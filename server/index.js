@@ -3,17 +3,16 @@ const router = express.Router();
 const cors = require('cors');
 const app = express();
 const connectDB = require('./config/connectDB');
+const cookiesParser = require("cookie-parser")
 require("dotenv").config();
 
 const routerOfUsers = require('./routers/userRouter')
-app.use(cors(/* {
-   origin:  process.env.FRONTEND_URL
-} */))
+app.use(cors());
 
 const port = process.env.PORT || 8000;
 
 app.use(express.json())
-
+app.use(cookiesParser())
 //users endpoint api 
 app.use("/api/users", routerOfUsers);
 

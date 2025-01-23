@@ -2,7 +2,6 @@ const express = require('express');
 const User = require('../models/UserModel');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-
 const registerUser = async (req, res) => {
     try {
         const { name, email, password, profile_pic } = req.body;
@@ -107,16 +106,26 @@ const loginByPass = async (req, res) =>{
 
         const token = await jwt.sign(jwtData, process.env.JWT_SECRET_KEY, { expiresIn: '1d'});
        
-        const cookieOptions = {
+        /* const cookieOptions = {
             http: true, 
             secure: true
-        }
-        return res.cookie('token', token, cookieOptions).status(200).json({
+        } */
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000
+        };
+       
+        res.cookie('token', token, cookieOptions);
+
+        return res.status(200).json({
             message: "Password is verified", 
             success: true, 
             data: { user }, 
             token: token
         })
+
     }catch(err){
         return res.status(500).json({
             message: err.message || err,
@@ -124,8 +133,64 @@ const loginByPass = async (req, res) =>{
         })
     }
 }
+
+const userDetails = async (req, res) => {
+
+    try{
+
+        const token = req.cookies.token || ""; 
+        console.log(" token is : ", token)
+
+        if(!token){
+            return {
+                message : "session expired", 
+                logout: true 
+            };
+        }
+    
+        const decode = await jwt.verify(token, process.env.JWT_SECRET_KEY) //this code to decode the information included in the token which is used in login in user
+        console.log(decode)
+        const user  = await User.findById(decode.id).select("-password");
+        return res.status(200).json({
+            message:"getting user details", 
+            data: user, 
+            success: true
+        })
+    }catch(err){
+        return res.status(500).json({
+            message: err.message || err, 
+            error: true
+        })
+    }
+}
+
+const logout = async (req, res) => {
+
+    try{
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000
+        };
+        
+        /* res.cookie(token, " ", cookieOptions) */;
+
+        return res.cookie('token', " ", cookieOptions).status(200).json({
+            message: "session expired", 
+            success: true
+        })
+    }catch(err){
+        return res.status(500).json({
+            message: err.message || err, 
+            error: true
+        })
+    }
+}
 module.exports = {
     registerUser,
     loginByEmail,
-    loginByPass
+    loginByPass,
+    userDetails, 
+    logout
 };
