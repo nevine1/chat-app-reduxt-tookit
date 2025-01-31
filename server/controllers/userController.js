@@ -78,12 +78,43 @@ const loginByEmail = async (req, res) => {
     }
 }
 
-const loginByPass = async (req, res) =>{
 
+
+const loginByPass = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+       
+        const user = await User.findOne({ email });
+        if (!user) {
+            console.log("User not found:", email);
+            return res.status(400).json({ message: "User not found" });
+        }
+        console.log("User found:", user);
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
+
+        const token = jwt.sign(
+            { userId: user._id, email: user.email },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "1d" }
+        );
+        console.log("Login successful, token generated.");
+        return res.status(200).json({ message: "Login successful", success: true, token });
+
+    } catch (err) {
+        console.error("Error during login:", err);
+        return res.status(500).json({ message: err.message });
+    }
+};
+
+
+
+
+const loginByPass2 = async (req, res) =>{
     try{
         const { password , userId} = req.body;
         const user = await User.findById(userId);
-
         if(!user){
             return res.status(404).json({
                 message: "user is not found",

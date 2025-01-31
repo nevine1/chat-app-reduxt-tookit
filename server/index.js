@@ -7,8 +7,11 @@ const cookiesParser = require("cookie-parser")
 require("dotenv").config();
 
 const routerOfUsers = require('./routers/userRouter')
-app.use(cors());
 
+app.use(cors({
+    origin: "http://localhost:3000", 
+    credentials: true // Allow credentials (cookies)
+}));
 const port = process.env.PORT || 8000;
 
 app.use(express.json())
