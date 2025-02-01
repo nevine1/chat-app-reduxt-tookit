@@ -55,10 +55,10 @@ const loginByEmail = async (req, res) => {
     try{
         const { email } = req.body;
 
-        const checkEmail = await User.findOne({email}).select("-password");
+        const user = await User.findOne({email}).select("-password");
         //using select(-password), means do not return password when u login
 
-        if(!checkEmail){
+        if(!user){
             return res.status(400).json({
                 message: "This email is not registered", 
                 error: true
@@ -68,7 +68,7 @@ const loginByEmail = async (req, res) => {
         return res.status(200).json({
             message: "Email is verified",
             success: true, 
-            data: checkEmail
+            data: { user }
         })
     }catch(err){
         return res.status(500).json({
