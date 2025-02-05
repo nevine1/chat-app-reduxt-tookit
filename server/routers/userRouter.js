@@ -4,6 +4,8 @@ const {
     registerUser, 
     loginByEmail,
     loginByPass, 
+    resetPass,
+    newPass,
     userDetails,
     logout,
     updateUserDetails
@@ -14,6 +16,9 @@ const {
 router.post("/register", registerUser);
 router.post("/loginEmail", loginByEmail);
 router.post("/loginPass", loginByPass)
+router.post("/loginPass", loginByPass)
+router.post("/resetPassword", resetPass);
+router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
 router.get("/logout", logout);
 router.post("/update-userInfo", updateUserDetails)

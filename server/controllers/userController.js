@@ -108,62 +108,65 @@ const loginByPass = async (req, res) => {
     }
 };
 
+const resetPass = async (req, res) =>{
 
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: "User not found" });
 
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString("hex");
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = Date.now() + 3600000; // Token valid for 1 hour
+        await user.save();
 
-const loginByPass2 = async (req, res) =>{
-    try{
-        const { password , userId} = req.body;
-        const user = await User.findById(userId);
-        if(!user){
-            return res.status(404).json({
-                message: "user is not found",
-                error: true
-            })
-        }
-        const deHashedPass = await bcrypt.compare(password, user.password)
+        // Create Reset Link
+        const resetLink = `${process.env.FRONTEND_URL}/auth/newPassword?token=${resetToken}`;
 
-        if(!deHashedPass){
-            return res.status(400).json({
-                message: "This password is not correct", 
-                error: true
-            })
-        }
-        
-        const jwtData = {
-            id: user._id, 
-            email: user.email
-        } //these are the data wanted to return in the token 
+        // Send Email
+        await transporter.sendMail({
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: "Password Reset Request",
+            html: `<p>You requested a password reset.</p>
+                   <p>Click <a href="${resetLink}">here</a> to reset your password.</p>
+                   <p>This link will expire in 1 hour.</p>`,
+        });
 
-        const token = await jwt.sign(jwtData, process.env.JWT_SECRET_KEY, { expiresIn: '7d'});
-       
-        /* const cookieOptions = {
-            http: true, 
-            secure: true
-        } */
-        const cookieOptions = {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000
-        };
-       
-        res.cookie('token', token, cookieOptions);
-
-        return res.status(200).json({
-            message: "Password is verified", 
-            success: true, 
-            data: { user }, 
-            token: token
-        })
-
-    }catch(err){
-        return res.status(500).json({
-            message: err.message || err,
-            error: true
-        })
+        res.json({ message: "Reset link sent to email" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
 }
+
+const newPass = async (req, res) => {
+    
+    const { token, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() },
+        });
+
+        if (!user) return res.status(400).json({ message: "Invalid or expired token" });
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.json({ message: "Password reset successful" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
+    }
+}
+
+
 
 const userDetails = async (req, res) => {
 
@@ -285,6 +288,8 @@ module.exports = {
     registerUser,
     loginByEmail,
     loginByPass,
+    resetPass,
+    newPass,
     userDetails, 
     logout, 
     updateUserDetails
