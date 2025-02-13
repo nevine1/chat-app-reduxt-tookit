@@ -141,7 +141,7 @@ const resetPass = async (req, res) =>{
 }
 
 const newPass = async (req, res) => {
-    
+
     const { token, newPassword } = req.body;
 
     try {
