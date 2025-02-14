@@ -40,5 +40,11 @@ const authSlice = createReducer({
     }
 })
 
-export const  { emailLogin, logOut } = authSlice.actions; 
+export const  { 
+  setIsLoading, 
+  passwordLogin,
+  setErrorMessage,
+  setSuccessMessage,
+  logOut 
+} = authSlice.actions; 
 export default  authSlice.reducer;

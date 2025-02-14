@@ -6,11 +6,17 @@ import toast from 'react-hot-toast'
 import axios from 'axios'
 import { FaUserTie } from "react-icons/fa";
 import { useRouter } from 'next/navigation';
+import { setIsLoading, 
+  passwordLogin,
+  setErrorMessage,
+  setSuccessMessage,
+  logOut  } from '../../store/slices/auth/authSlice.js';
+  import { dispatch } from 'react-redux'
 const LoginByEmail = () => {
     const router = useRouter();
     const [email, setEmail] = useState("")
 
-    const handleSubmit = async (e) => {
+    /* const handleSubmit = async (e) => {
         e.preventDefault();
      
         try{
@@ -30,8 +36,20 @@ const LoginByEmail = () => {
         }catch(err){
             toast.error(err?.response?.data?.message)
         }
-    }
-
+    } */
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      dispatch(setIsLoading(true));
+      try {
+        const URL = process.env.NEXT_PUBLIC_BACK_END_URL
+        const response = await axios.post(``${URL}/users/loginEmail``, { email });
+        dispatch(emailLogin(response.data)); 
+      } catch (error) {
+        dispatch(setErrorMessage(error.response?.data?.message || "Invalid email"));
+      } finally {
+        dispatch(setIsLoading(false));
+      }
+    };
   return (
     <div className="flex justify-center items-center w-screen">
       <div className="flex flex-col justify-center items-center mt-[5%] w-[30%] lg:w-[30%] sm:w-[50%] p-6 bg-white shadow-lg rounded-lg">
