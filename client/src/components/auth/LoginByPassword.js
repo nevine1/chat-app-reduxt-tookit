@@ -5,62 +5,70 @@ import axios from "axios";
 import Image from "next/image";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Link from 'next/link'
+import { setIsLoading, 
+    setErrorMessage,
+    setSuccessMessage,
+    passwordToLogin
+ } from '../../store/slices/auth/authSlice.js';
+    import { useDispatch, useSelector } from 'react-redux'
+    import store from '../../store/store.js'
 
 const LoginByPassword = () => {
     const router = useRouter();
+    const dispatch = useDispatch();
     const [password, setPassword] = useState("");
-    const [email, setEmail] = useState("");
-    const [user, setUser ] =  useState({});
+  const [email, setEmail] = useState("");
+    //const [user, setUser ] =  useState({});
     const [type, setType] = useState("password")
-
+    const {isLoading, error, successMessage, errorMessage, user } = useSelector((state) => state.auth)
+    console.log(user.email)
     //retrieve the email and userDetails 
-    useEffect(() => {
-        const storedEmail = localStorage.getItem("email");
-        if (storedEmail) {
-            setEmail(storedEmail);
-        }
     
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (error) {
-                console.error("Error parsing user data:", error);
+   /*  useEffect(() => {
+        if(!user.email){
+            const storedEmail = localStorage.getItem("email");
+            if (storedEmail) {
+                setEmail(storedEmail);
             }
         }
-    }, []);
-    
-
+        
+    }, []); */
 
 const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
 
 
  
 console.log(user)
-    const handleSubmit = async (e) => {
-      e.preventDefault();
+const handleSubmit = async (e) => {
+    
+    e.preventDefault();
+    dispatch(setIsLoading(true));
+    const email = user?.email || "email"
     try {
         const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
         const resp = await axios.post(`${URL}/users/loginPass`, {
-            email, // if email is not sending with request , it will not login
+            email: user.email, // Use Redux state instead of localStorage
             password
         });
 
         toast.success(resp?.data?.message);
-        console.log(resp);
 
         if (resp.data.token) {
             localStorage.setItem('token', resp.data.token);
+            dispatch(passwordToLogin({ email: user.email, password, token: resp.data.token }));
         }
 
         setPassword('');
         router.push('/dashboard');
     } catch (err) {
         toast.error(err?.response?.data?.message);
+        dispatch(setErrorMessage(err?.response?.data?.message));
+    } finally {
+        dispatch(setIsLoading(false));
     }
-  };
+};
   
-  
+  console.log(user)
 
     return (
         <div className="flex justify-center items-center w-screen">

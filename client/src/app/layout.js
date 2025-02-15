@@ -6,6 +6,8 @@ import Navbar from "../components/Navbar"
 import AuthLayout from '@/components/AuthLayout';
 import Link from 'next/link'
 import toast, { Toaster } from 'react-hot-toast';
+import { Provider } from 'react-redux';
+import store from '../store/store'
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -28,13 +30,16 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        { 
-          auth ?  <AuthLayout/> : <Navbar/>
-        } 
-        <Toaster/> 
+        <Provider store={store}>
 
-        {children}
+        
+          { 
+            auth ?  <AuthLayout/> : <Navbar/>
+          } 
+          <Toaster/> 
 
+          {children}
+        </Provider>
       </body>
     </html>
   );

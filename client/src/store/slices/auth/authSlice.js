@@ -1,18 +1,22 @@
-import { createReducer } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
 
 const initialState = {
-    username: "", 
-    email: "", 
-    password: "",
+  user: { 
+      name: "", 
+      email: "", 
+      password: "",
+      profile_pic: ""
+    },
+    
     token: null,
     isLoading: false, 
     errorMessage: null,
     successMessage : null,  
 }
-const authSlice = createReducer({
+const authSlice = createSlice({
     name: "auth",
-    initialState:{}, 
+    initialState, 
     reducers:{
         setIsLoading: (state, action) => {
             state.isLoading = action.payload;
@@ -24,17 +28,21 @@ const authSlice = createReducer({
           setSuccessMessage: (state, action) => {
             state.successMessage = action.payload;
           },
-          emailLogin: (state, action) => {
-            state.email = action.payload.user; 
+          emailToLogin: (state, action) => {
+            state.user.email = action.payload.email; 
             state.errorMessage = null;
             state.successMessage = "Email verified! Proceed to login with your password.";
-        
+            localStorage.setItem("email", action.payload.user.email);
         }, 
-        passwordLogin : (state, action ) => {
-
+        passwordToLogin : (state, action ) => {
+          const { email, password , token} = action.payload; 
+          if(email ){
+            state.user = {...state.user, email, password};
+            state.token = action.payload.token
+          }
         },
         logOut : (state, action ) =>{
-            state.user = null;``
+            state.user.email = " ";
             state.token = null; 
         }
     }
@@ -45,6 +53,8 @@ export const  {
   passwordLogin,
   setErrorMessage,
   setSuccessMessage,
+  emailToLogin,
+  passwordToLogin,
   logOut 
 } = authSlice.actions; 
 export default  authSlice.reducer;
