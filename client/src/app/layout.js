@@ -7,7 +7,8 @@ import AuthLayout from '@/components/AuthLayout';
 import Link from 'next/link'
 import toast, { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
-import store from '../store/store'
+import { store, persistor } from '../store/store'
+import { PersistGate } from "redux-persist/integration/react";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -31,6 +32,9 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor} >
+
+          </PersistGate>
 
         
           { 
