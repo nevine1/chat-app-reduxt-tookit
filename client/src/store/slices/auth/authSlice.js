@@ -11,8 +11,8 @@ const initialState = {
     
     token: null,
     isLoading: false, 
-    errorMessage: null,
-    successMessage : null,  
+    errorMessage: "",
+    successMessage : "",  
 }
 const authSlice = createSlice({
     name: "auth",
@@ -28,22 +28,28 @@ const authSlice = createSlice({
           setSuccessMessage: (state, action) => {
             state.successMessage = action.payload;
           },
-          emailToLogin: (state, action) => {
-            state.user.email = action.payload.email; 
-            state.errorMessage = null;
-            state.successMessage = "Email verified! Proceed to login with your password.";
-            localStorage.setItem("email", action.payload.user.email);
-        }, 
+        emailToLogin: (state, action) => {
+          if (!action.payload || !action.payload.email) return; 
+              state.user.email = action.payload.email; 
+              state.errorMessage = null;
+              state.successMessage = "Email is successfully verified.";
+            
+          }, 
         passwordToLogin : (state, action ) => {
           const { email, password , token} = action.payload; 
           if(email ){
-            state.user = {...state.user, email, password};
-            state.token = action.payload.token
+            state.user.email = email;
+            state.user.password = password;
+            state.token = token;
+            state.successMessage = "Password is successfully verified.";
           }
         },
-        logOut : (state, action ) =>{
-            state.user.email = " ";
-            state.token = null; 
+      logOut: (state, action) => {
+          
+        state.user = { name: "", email: "", password: "", profile_pic: "" };
+        state.token = null; 
+        state.successMessage = "Logged out successfully";
+            
         }
     }
 })

@@ -33,16 +33,15 @@ export default function RootLayout({ children }) {
       >
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor} >
-
-          </PersistGate>
-
         
           { 
             auth ?  <AuthLayout/> : <Navbar/>
           } 
           <Toaster/> 
 
-          {children}
+            {children}
+            
+          </PersistGate>
         </Provider>
       </body>
     </html>

@@ -20,60 +20,52 @@ const LoginByPassword = () => {
   const [email, setEmail] = useState("");
     //const [user, setUser ] =  useState({});
     const [type, setType] = useState("password")
-    const {isLoading, error, successMessage, errorMessage, user } = useSelector((state) => state.auth)
-    console.log(user.email)
-    //retrieve the email and userDetails 
+    const {isLoading,  successMessage, errorMessage, user, token } = useSelector((state) => state.auth)
+    console.log(user)
     
-   /*  useEffect(() => {
-        if(!user.email){
-            const storedEmail = localStorage.getItem("email");
-            if (storedEmail) {
-                setEmail(storedEmail);
-            }
-        }
-        
-    }, []); */
-
-const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
-
-
- 
+    const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
+    const storedEmail = user?.email || " "
+console.log( "user email is: ", storedEmail)
+console.log( "user token is: ", token)
+    const userName = storedEmail ? storedEmail.split('@')[0] : " User"
 console.log(user)
-const handleSubmit = async (e) => {
-    
-    e.preventDefault();
-    dispatch(setIsLoading(true));
-    const email = user?.email || "email"
-    try {
-        const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
-        const resp = await axios.post(`${URL}/users/loginPass`, {
-            email: user.email, // Use Redux state instead of localStorage
-            password
-        });
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        dispatch(setIsLoading(true));
 
-        toast.success(resp?.data?.message);
+        try {
+            const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
+            const resp = await axios.post(`${URL}/users/loginPass`, {
+                email: storedEmail, // Using Redux state email
+                password
+            });
+            dispatch(setSuccessMessage("Logged in successfully"))
+            toast.success("Logged in successfully");
 
-        if (resp.data.token) {
-            localStorage.setItem('token', resp.data.token);
-            dispatch(passwordToLogin({ email: user.email, password, token: resp.data.token }));
+            if (resp.data.token) {
+                dispatch(passwordToLogin({ email: storedEmail, password, token: resp.data.token }));
+            }
+
+            setPassword('');
+
+            router.push('/dashboard');
+        } catch (err) {
+            toast.error(err?.response?.data?.message);
+            dispatch(setErrorMessage(err?.response?.data?.message));
+        } finally {
+            dispatch(setIsLoading(false));
         }
-
-        setPassword('');
-        router.push('/dashboard');
-    } catch (err) {
-        toast.error(err?.response?.data?.message);
-        dispatch(setErrorMessage(err?.response?.data?.message));
-    } finally {
-        dispatch(setIsLoading(false));
-    }
-};
+    };
   
-  console.log(user)
+ 
 
     return (
         <div className="flex justify-center items-center w-screen">
             <div className="flex flex-col justify-center items-center py-5 mt-[5%] w-[30%] lg:w-[30%] p-6 bg-white shadow-lg rounded-lg">
-            <h1 className="text-lg font-semibold mb-4 text-primary">Welcome {user.name} </h1>
+            {
+                 user && <h1 className="text-lg font-semibold mb-4 text-primary">Welcome {user.name || userName} </h1>
+            }
+                
                 {
                     user && 
 
@@ -108,12 +100,14 @@ const handleSubmit = async (e) => {
                     </span>
                 </div>
 
-                    <button type="submit" className="bg-primary text-white py-2 px-4 mb-3 rounded text-bold text-[20px]">
-                        Login
+                    <button type="submit"
+                        disabled={isLoading}
+                        className="bg-primary text-white py-2 px-4 mb-3 rounded text-bold text-[20px]">
+                        { isLoading? "Loading..." : "Login"}
                     </button>
-                    <p className="text-[15px] text-primary mb-6 text-center">
+                    {/* <p className="text-[15px] text-primary mb-6 text-center">
                         <Link href="/auth/resetPassword" >Forgot password</Link>
-                    </p>
+                    </p> */}
                 </form>
             </div>
         </div>

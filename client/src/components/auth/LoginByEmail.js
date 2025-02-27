@@ -15,43 +15,60 @@ import {
   import { useDispatch, useSelector } from 'react-redux'
   import store from '../../store/store.js'
 const LoginByEmail = () => {
-  const {isLoading, error, successMessage, errorMessage, user} = useSelector((state) => state.auth)
+    const { isLoading, error, successMessage, errorMessage, user } = useSelector((state) => state.auth);
     const router = useRouter();
     const dispatch = useDispatch();
     const [email, setEmail] = useState("")
-    
-    const handleSubmit = async (e) => {
+  
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch(setIsLoading(true));
 
-      e.preventDefault();
-      dispatch(setIsLoading(true));
-    
-      try {
-
+    try {
         const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
-        const response = await axios.post(`${URL}/users/loginEmail`, { email });
-    
-        if (response.status !== 200) {
-            throw new Error("API did not return success"); 
+      const response = await axios.post(`${URL}/users/loginEmail`, { email });
+      
+      if (!response.data) {
+        dispatch(setErrorMessage("Invalid response from server."));
+        toast.error("Invalid response from server.")
+      } else {
+        dispatch(emailToLogin({ email: response.data.data.user.email }));
+        dispatch(setSuccessMessage("Email is successfully verified."));
+        toast.success("Email is successfully verified, proceed to login with password");
+        router.push("/auth/password");
         }
-    
-        dispatch(setErrorMessage("")); // Clear previous errors
-        dispatch(setSuccessMessage("Email verified! Proceed to password login"));
-        dispatch(emailToLogin(response.data.data.user.email));
-        router.push("/auth/password")
-        } catch (error) {
-            console.log("Caught Error:", error);
-            const errorMsg = error.response?.data?.message || "Something went wrong. Please try again.";
-            dispatch(setErrorMessage(errorMsg));
-            toast.error(errorMsg);
-    
-    
-      } finally {
+     
+      
+    } catch (error) {
+        console.error("Login email error:", error);
+
+        if (error.response) {
+            if (error.response.data && error.response.data.message) {
+                dispatch(setErrorMessage(error.response.data.message));
+                toast.error(error.response.data.message);
+            } else {
+                dispatch(setErrorMessage("Something went wrong with the server response."));
+                toast.error("Something went wrong with the server response.");
+            }
+        } else if (error.request) {
+            dispatch(setErrorMessage("No response from server. Please try again."));
+            toast.error("No response from server. Please try again.");
+        } else {
+            dispatch(setErrorMessage("An error occurred while setting up the request."));
+            toast.error("An error occurred while setting up the request.");
+        }
+    } finally {
         dispatch(setIsLoading(false));
-      }
-    };
-   useEffect(() =>{
-    console.log(user)
-   }, []) 
+    }
+};
+
+  useEffect(() => {
+    dispatch(setErrorMessage(""));
+    dispatch(setSuccessMessage(""))
+   }, [dispatch])
+    
+  
   return (
     <div className="flex justify-center items-center w-screen">
       <div className="flex flex-col justify-center items-center mt-[5%] w-[30%] lg:w-[30%] sm:w-[50%] p-6 bg-white shadow-lg rounded-lg">
@@ -66,7 +83,6 @@ const LoginByEmail = () => {
             name="email" 
             type="email" 
             placeholder="Email..." 
-          
             onChange={(e) => setEmail(e.target.value)}
             className="p-3 border rounded mb-3 text-gray-500 focus:outline-primary-dark bg-primary-light" 
             autoComplete="off"
@@ -76,7 +92,7 @@ const LoginByEmail = () => {
             type="submit" 
             disabled={isLoading}
             className="bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[20px]">
-            { isLoading ? "Loading" : "Let's Check Password" }
+            { isLoading ? "Loading" : "Let's Check Password" } 
           </button>
         </form>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>} 

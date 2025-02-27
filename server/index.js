@@ -22,7 +22,8 @@ app.use(cookiesParser());
 app.use("/api/users", routerOfUsers);
 
 app.get("/", (req, res) => {
-    res.json({ message: `Server is running very well at: ${port}` });
+    res.json({ message: `Server is running very well at: ${port} ,  ${req}` });
+    console.log(req.url)
 });
 
 connectDB().then(() => {

@@ -1,6 +1,5 @@
 "use client"
 import React from 'react'
-import { useRouter } from 'next/navigation';
 import LoginByPassword from '@/components/auth/LoginByPassword'
 const page = () => {
   return (

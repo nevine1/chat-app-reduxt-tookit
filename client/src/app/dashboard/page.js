@@ -6,17 +6,12 @@ import UserDetails from "@/components/UserDetails";
 const page = () => {
     const router = useRouter();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            router.push("/auth/login");
-        }
-    }, []);
+    
 
     return <div>
-                Welcome to the Dashboard
-                <h1>Hello usser Detailsssssssssssssssssssss</h1>
-                <UserDetails/>
+            Welcome to the Dashboard
+            <h1>Hello usser Detailsssssssssssssssssssss</h1>
+            <UserDetails/>
             </div>;
 };
 

@@ -54,6 +54,7 @@ const loginByEmail = async (req, res) => {
 
     try{
         const { email } = req.body;
+ console.log(req.body);
 
         const user = await User.findOne({email}).select("-password");
         //using select(-password), means do not return password when u login
