@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "../components/Navbar"
-import AuthLayout from '@/components/AuthLayout';
 import Link from 'next/link'
 import toast, { Toaster } from 'react-hot-toast';
 import { Provider } from 'react-redux';
@@ -25,7 +24,7 @@ const geistMono = Geist_Mono({
 }; */
 
 export default function RootLayout({ children }) {
-  const [auth, setAuth ] = useState(false)
+ 
   return (
     <html lang="en">
       <body
@@ -34,9 +33,8 @@ export default function RootLayout({ children }) {
         <Provider store={store}>
           <PersistGate loading={null} persistor={persistor} >
         
-          { 
-            auth ?  <AuthLayout/> : <Navbar/>
-          } 
+          <Navbar/>
+          
           <Toaster/> 
 
             {children}
