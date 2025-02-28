@@ -4,9 +4,14 @@ import { IoClose } from "react-icons/io5";
 import Link from 'next/link';
 import axios from 'axios'
 import toast, { Toaster } from 'react-hot-toast';
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation';
+import { registerNewUser, setIsLoading, setSuccessMessage, setErrorMessage } from '../../store/slices/auth/authSlice';
+import { useDispatch , useSelector } from 'react-redux';
+
 const Register = () => { 
   const router = useRouter();
+  const dispatch = useDispatch();
+  const { user, isLoading, successMessage, errorMessage } = useSelector((state) => state.auth);
   const [data, setData ] = useState({
     name: "", 
     email: "", 
@@ -44,27 +49,26 @@ const Register = () => {
     const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/register`;
 
     try{
-      const resp = await axios.post(URL, data);
-      
+      const resp = await axios.post(URL, data); 
+      console.log( " response is:" , resp)
+      dispatch(registerNewUser(resp.data.data))
+      dispatch(setSuccessMessage(resp?.data?.message))
       toast.success(resp?.data?.message)
-
-     if(resp.data.success){
-      setData({
-        name: "", 
-        email: "", 
-        profile_pic: "", 
-        password: ""
-      })
-     }
+      dispatch(setIsLoading(false))
+      
      router.push('/auth/email')
-    }catch(err) {
-     toast.error(err?.response?.data?.message)
+    
+    } catch (err) {
+      dispatch(setErrorMessage(err.response?.data?.message || "Registration failed"));
+      toast.error(err?.response?.data?.message)
+        dispatch(setIsLoading(false));
+     
   
     }
   }
   return (
     <div className="flex justify-center items-center w-screen">
-      <div className="flex flex-col justify-center items-center mt-[5%] w-[30%] p-6 bg-white shadow-lg rounded-lg">
+      <div className="flex flex-col justify-center items-center mt-[5%] sm:w-[60%]  lg:w-[30%] p-6 bg-white shadow-lg rounded-lg">
         <h1 className="text-lg font-semibold mb-4 text-primary">Welcome to chat-app </h1>
         <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
           <input 
@@ -131,8 +135,9 @@ const Register = () => {
 
           <button 
             type="submit" 
+            disabled={isLoading}
             className="bg-primary text-white py-3 px-4 mb-4 rounded text-bold text-[20px]">
-            Submit
+            { isLoading? "Loading..."  : "Register"}
           </button>
         </form>
         <p className="text-gray-600 text-[16px] my-2">

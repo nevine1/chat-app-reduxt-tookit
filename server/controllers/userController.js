@@ -101,8 +101,17 @@ const loginByPass = async (req, res) => {
             { expiresIn: "1d" }
         );
         console.log("Login successful, token generated.");
-        return res.status(200).json({ message: "Login successful", success: true, token });
-
+        return res.status(200).json({
+            message: "Login successful",
+            success: true,
+            token,
+            user: {
+                name: user.name,
+                email: user.email,
+                profile_pic: user.profile_pic
+            }
+        });
+        
     } catch (err) {
         console.error("Error during login:", err);
         return res.status(500).json({ message: err.message });

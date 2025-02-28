@@ -25,11 +25,12 @@ const LoginByPassword = () => {
     
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
     const storedEmail = user?.email || " "
-console.log( "user email is: ", storedEmail)
-console.log( "user token is: ", token)
-    const userName = storedEmail ? storedEmail.split('@')[0] : " User"
-console.log(user)
+
+
+    const userName = storedEmail ? storedEmail.split('@')[0] : " User";
+
     const handleSubmit = async (e) => {
+
         e.preventDefault();
         dispatch(setIsLoading(true));
 
@@ -39,6 +40,7 @@ console.log(user)
                 email: storedEmail, // Using Redux state email
                 password
             });
+
             dispatch(setSuccessMessage("Logged in successfully"))
             toast.success("Logged in successfully");
 
@@ -46,9 +48,8 @@ console.log(user)
                 dispatch(passwordToLogin({ email: storedEmail, password, token: resp.data.token }));
             }
 
-            setPassword('');
-
             router.push('/dashboard');
+            
         } catch (err) {
             toast.error(err?.response?.data?.message);
             dispatch(setErrorMessage(err?.response?.data?.message));
