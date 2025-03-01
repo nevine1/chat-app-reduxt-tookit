@@ -37,7 +37,7 @@ const registerUser = async (req, res) => {
             data: {
                 name: savedUser.name,
                 email: savedUser.email,
-                password: savedUser.password,
+                password,
                 profile_pic: savedUser.profile_pic
             }
         });

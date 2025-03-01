@@ -56,11 +56,14 @@ const Register = () => {
       toast.success(resp?.data?.message)
       dispatch(setIsLoading(false))
       
-     router.push('/auth/email')
-    
+     
+        router.push('/auth/email');
+      
+          
     } catch (err) {
+      console.log("Registeration error is:", err)
       dispatch(setErrorMessage(err.response?.data?.message || "Registration failed"));
-      toast.error(err?.response?.data?.message)
+      toast.error(err?.response?.data?.message  || "Something went wrong")
         dispatch(setIsLoading(false));
      
   

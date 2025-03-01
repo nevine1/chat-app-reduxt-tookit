@@ -24,7 +24,11 @@ const authSlice = createSlice({
           setErrorMessage: (state, action) => {
             state.errorMessage = action.payload;
           },
-          
+        registerNewUser: (state, action) => { 
+          state.user = action.payload; 
+          state.successMessage = "User registered successfully";
+          state.isLoading = false;
+        },
           setSuccessMessage: (state, action) => {
             state.successMessage = action.payload;
           },
@@ -44,7 +48,7 @@ const authSlice = createSlice({
             state.successMessage = "Password is successfully verified.";
           }
         },
-      logOut: (state, action) => {
+      logOut: (state) => {
           
         state.user = { name: "", email: "", password: "", profile_pic: "" };
         state.token = null; 
@@ -57,6 +61,7 @@ const authSlice = createSlice({
 export const  { 
   setIsLoading, 
   passwordLogin,
+  registerNewUser,
   setErrorMessage,
   setSuccessMessage,
   emailToLogin,
