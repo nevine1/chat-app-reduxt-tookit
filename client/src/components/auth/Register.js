@@ -18,7 +18,6 @@ const Register = () => {
     profile_pic: "", 
     password: ""
   })
-
   const [uploadPhoto, setUploadPhoto] = useState("");
 
   const handleChange = (e) => {
@@ -26,21 +25,21 @@ const Register = () => {
     setData((prev) => (
       { ...prev, [name] : value }
     )
-      
     )}
-    const handleUploadPhoto = (e) => {
-      const file = e.target.files[0];
-      setUploadPhoto(file)
-
-      setData((prev) =>(
-        {...prev, profile_pic : file ? file.name : " "}
-      ))
-    }
     
+    const handleUploadPhoto = (e) => {
+      const file = e.target.files?.[0] || null; 
+      setUploadPhoto(file);
+      setData((prev) => ({
+        ...prev,
+        profile_pic: file?.name || "",
+      }));
+    };
     const handlePhotoClear = (e) =>{
       e.stopPropagation();
       setUploadPhoto(null)
-    }
+  }
+  
   const handleSubmit = async (e) =>{
     e.preventDefault();
     e.stopPropagation()

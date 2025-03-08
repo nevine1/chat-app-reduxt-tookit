@@ -18,9 +18,9 @@ const Navbar = () => {
   const handleLogout = () => {
     
     dispatch(logOut());
-        const persistor = persistStore(store); 
-        persistor.purge();
-        router.push("/");
+      const persistor = persistStore(store); 
+      persistor.purge();
+      router.push("/");
   }
 
   return (

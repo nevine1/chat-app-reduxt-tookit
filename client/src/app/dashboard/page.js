@@ -13,9 +13,9 @@ const page = () => {
         }
     }, []); */
 
-    return <div>
+    return <div className="p-20">
                 Welcome to the Dashboard
-                <h1>Hello usser Detailsssssssssssssssssssss</h1>
+                
                 <UserDetails/>
             </div>;
 };
