@@ -1,7 +1,8 @@
 "use client"
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import UserDetails from "@/components/UserDetails";
+import SideBar from '../../components/messaging/SideBar'
+//import UserDetails from "@/components/UserDetails";
 
 const page = () => {
     const router = useRouter();
@@ -13,11 +14,15 @@ const page = () => {
         }
     }, []); */
 
-    return <div className="p-20">
-                Welcome to the Dashboard
-                
-                <UserDetails/>
-            </div>;
+    return (
+        <div className="flex flex-col sm:flex-row  h-screen gap-4">
+            <div className="w-full sm:w-1/3 bg-slate-100 p-4 shadow-md">
+                <SideBar/>
+            </div>
+            <div className="w-full sm:w-2/3 bg-blue-500 p-4 shadow-md">right side</div>
+           
+        </div>
+    )
 };
 
 export default page;

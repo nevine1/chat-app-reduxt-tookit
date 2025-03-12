@@ -37,8 +37,8 @@ const authSlice = createSlice({
               state.user.email = action.payload.email; 
               state.errorMessage = null;
               state.successMessage = "Email is successfully verified.";
-            
-          }, 
+        }, 
+        
         passwordToLogin : (state, action ) => {
           const { email, password , token} = action.payload; 
           if(email ){
