@@ -12,8 +12,8 @@ const Navbar = () => {
   const dispatch = useDispatch();
   const router = useRouter();
     const {user, token} = useSelector((state) => state.auth)
-  console.log("user details in the navbar", user)
-  console.log("user token in the navbar", token)
+  /* console.log("user details in the navbar", user)
+  console.log("user token in the navbar", token) */
 
   const handleLogout = () => {
     

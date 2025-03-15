@@ -34,6 +34,7 @@ const LoginByEmail = () => {
         toast.error("Invalid response from server.")
       } else {
         dispatch(emailToLogin({ email: response.data.data.user.email }));
+        /* console.log("email response data, ", response.data) */
         dispatch(setSuccessMessage("Email is successfully verified."));
         toast.success("Email is successfully verified, proceed to login with password");
         router.push("/auth/password");

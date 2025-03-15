@@ -26,9 +26,6 @@ const LoginByPassword = () => {
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
     const storedEmail = user?.email || " "
 
-
-    const userName = storedEmail ? storedEmail.split('@')[0] : " User";
-
     const handleSubmit = async (e) => {
 
         e.preventDefault();
@@ -37,16 +34,24 @@ const LoginByPassword = () => {
         try {
             const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
             const resp = await axios.post(`${URL}/users/loginPass`, {
-                email: storedEmail, // Using Redux state email
+                email: storedEmail, 
                 password
             });
-
-            dispatch(setSuccessMessage("Logged in successfully"))
+            console.log("Response from Login By Password API:", resp.data);
+            dispatch(setSuccessMessage("Logged in successfully"));
             toast.success("Logged in successfully");
-
+            
             if (resp.data.token) {
-                dispatch(passwordToLogin({ email: storedEmail, password, token: resp.data.token }));
-            }
+                dispatch(passwordToLogin({
+                    email: storedEmail,
+                    password,
+                    token: resp.data.token,
+                    user: {
+                        name: resp.data.user.name, 
+                        profile_pic: resp.data.user.profile_pic,
+                    },
+                }));
+                }
 
             router.push('/dashboard');
             
@@ -64,7 +69,7 @@ const LoginByPassword = () => {
         <div className="flex justify-center items-center w-screen">
             <div className="flex flex-col justify-center items-center py-5 mt-[5%] w-[30%] lg:w-[30%] p-6 bg-white shadow-lg rounded-lg">
             {
-                 user && <h1 className="text-lg font-semibold mb-4 text-primary">Welcome {user.name || userName} </h1>
+                 user && <h1 className="text-lg font-semibold mb-4 text-primary">Welcome {user.name } </h1>
             }
                 
                 {

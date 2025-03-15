@@ -66,6 +66,12 @@ const loginByEmail = async (req, res) => {
             })
         }
 
+        /* const responseData = {
+            message: "Email is verified",
+            success: true,
+            data: { user }
+        };
+        console.log("Response Data Before Sending:", responseData); */
         return res.status(200).json({
             message: "Email is verified",
             success: true, 
@@ -86,11 +92,11 @@ const loginByPass = async (req, res) => {
         const { email, password } = req.body;
        
         const user = await User.findOne({ email });
+        
         if (!user) {
             console.log("User not found:", email);
             return res.status(400).json({ message: "User not found" });
         }
-        console.log("User found:", user);
 
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
@@ -101,8 +107,9 @@ const loginByPass = async (req, res) => {
             { expiresIn: "1d" }
         );
         console.log("Login successful, token generated.");
+
         return res.status(200).json({
-            message: "Login successful",
+            message: "Login successful response is:" + res,
             success: true,
             token,
             user: {
@@ -111,7 +118,7 @@ const loginByPass = async (req, res) => {
                 profile_pic: user.profile_pic
             }
         });
-        
+        console.log("response is : ", res.data)
     } catch (err) {
         console.error("Error during login:", err);
         return res.status(500).json({ message: err.message });
