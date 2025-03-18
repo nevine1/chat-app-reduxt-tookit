@@ -80,7 +80,7 @@ const LoginByPassword = () => {
                     alt="profile pic "
                     width={70}
                     height={70}
-                    className="w-auto h-auto rounded-full"
+                    className="rounded-full h-8 w-8"
                     priority
                 />
 
