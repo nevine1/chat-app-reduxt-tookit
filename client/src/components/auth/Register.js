@@ -21,7 +21,7 @@ const Register = () => {
   const [uploadPhoto, setUploadPhoto] = useState("");
 
   const handleChange = (e) => {
-    const { name, value }= e.target;
+    const { name, value } = e.target;
     setData((prev) => (
       { ...prev, [name] : value }
     )
@@ -34,11 +34,12 @@ const Register = () => {
         ...prev,
         profile_pic: file?.name || "",
       }));
-    };
+  };
+  
     const handlePhotoClear = (e) =>{
       e.stopPropagation();
       setUploadPhoto(null)
-  }
+    }
   
   const handleSubmit = async (e) =>{
     e.preventDefault();
