@@ -2,32 +2,66 @@ import { useState } from 'react'
 import { IoMdCloseCircle } from "react-icons/io"; 
 import Image from 'next/image';
 import { IoCloseCircle } from "react-icons/io5";
+import { updateUser } from '@/store/slices/auth/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios'
 const EditUserDetails = ({ user, onClose }) => {
-  const profilePic = user?.profile_pic ? `/assets/{user?.profile_pic}` : "/assets/flower.jpg"
+  const dispatch = useDispatch();
+  const { token } = useSelector((state) =>state.auth)
+  const profilePic = user?.profile_pic ? `/assets/${user?.profile_pic}` : "/assets/flower.jpg"
    const [uploadPhoto, setUploadPhoto] = useState("");
   const [data, setData] = useState({
-    profile_pic: user.profile_pic, 
-    name: user.name
+    profile_pic: user?.profile_pic || " ", 
+    name: user?.name || " "
   })
-   //const NewProfilePic = uploadPhoto ? `assets/${uploadPhoto?.name}` 
-  const handleChange = () => {
-    const { name, value } = e.target
-
-    setData((prev) => ({ ...prev , [name]: value}))
-  }
- 
-  const handleUploadPhoto = (e) => {
-      const file = e.target.files?.[0] || null; 
-      setUploadPhoto(file);
-      setData((prev) => ({
-        ...prev,
-        profile_pic: file?.name || "",
-      }));
+  console.log(token)
+   
+ const handleChange = (e) => {
+    setData({ ...data, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = () => {
-    console.log(data)
+ 
+    const handleUploadPhoto = (e) => {
+      const file = e.target.files?.[0];
+      if (file) {
+        setUploadPhoto(file);
+      }
+    };
+
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+
+  try {
+    const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/update-userInfo`;
+    
+
+    if (!token) {
+      console.error("No authentication token found. User might not be logged in.");
+      return;
+    }
+
+    const resp = await axios.post(  
+      URL,
+      data,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,  
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    console.log("Updated data:", resp.data);
+    dispatch(updateUser({ user: resp.data }));
+
+  } catch (err) {
+    console.error("Error updating user:", err.response?.data || err.message);
   }
+};
+
+
+ 
   return (
       <div className="fixed top-0 right-0 left-0 bottom-0 bg-gray-700 bg-opacity-70  flex  justify-center items-center">
           <div className="fixed top-5 right-5 text-blue-800">
@@ -36,12 +70,15 @@ const EditUserDetails = ({ user, onClose }) => {
           <div className="bg-white p-8 rounded-md">
               <h1 className="font-bold text-center mb-4 ">Profile Details</h1>
               <p className="py-3">Edit user details:</p>
-            <form className="flex flex-col gap-4 sm:w-[30vw] rounded-sm mb-4  px-3 border-2"
-              onSubmit={handleSubmit}>
+              <form
+                  className="flex flex-col gap-4 sm:w-[30vw] rounded-sm mb-4  px-3 border-2"
+                onSubmit={handleSubmit}
+                >
+          
                 <input 
                   name="name" 
                   type="text" 
-                  value={user.name}
+                  value={data.name || " "}
                   onChange={handleChange}
                   className="p-2 border rounded mb-3 mt-3 text-gray-500 text-[15px] focus:outline-primary-dark bg-primary-light"         
                 />
@@ -50,8 +87,7 @@ const EditUserDetails = ({ user, onClose }) => {
                     src={uploadPhoto ? `/assets/${uploadPhoto?.name}` : profilePic}
                     width={50}
                     height={50}
-                    alt={`profile pic for ${user.name}`}
-                    title={`profile pic for ${user.name}`}
+                    alt={uploadPhoto ? `Uploaded profile picture` : `Profile picture of ${user?.name || "User"}`}
                     className="rounded-full shadow-md h-15 w-15"
                     />
                 
@@ -71,21 +107,21 @@ const EditUserDetails = ({ user, onClose }) => {
                               />
                         </div> 
               
-                        {/* <input 
-                          name="password" 
-                          type="password" 
-                          value={data.password}
-                          placeholder="Password..."
-                          autoComplete="new-password"
-                          onChange={handleChange}
-                          className="p-3 border rounded mb-3 text-gray-500 focus:outline-primary-dark bg-primary-light" 
-                          /> */}
+                      
               
-                        <button 
+                    <div className="flex flex-row gap-5 justify-center">
+                      <button 
                           type="submit" 
                           className="bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[18px]">
                           Save
                         </button>
+                        <button 
+                          type="button" 
+                          onClick={onClose}
+                          className="bg-white border border-primary text-primary py-2 px-4 mb-4 rounded text-bold text-[18px]">
+                          Cancel
+                        </button>
+                    </div>
               </form>
               
           </div>

@@ -44,7 +44,7 @@ const SideBar = () => {
         <div className="flex-grow"></div> 
         
         <div title="Logout" className="mb-4 flex flex-col items-center -mt-5">
-          <button title={user.name} onClick={() =>setEditUserOpen(true)}>
+          <button  onClick={() =>setEditUserOpen(true)}>
             <Image
               src={profilePic}
               width={35}

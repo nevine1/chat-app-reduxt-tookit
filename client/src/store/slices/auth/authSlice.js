@@ -42,24 +42,15 @@ const authSlice = createSlice({
         }, 
         
         passwordToLogin : (state, action ) => {
-          /* const { email, password , token} = action.payload; 
-          if(email ){
-            state.user.email = email;
-            state.user.password = password;
-           
-            state.token = token;
-            state.successMessage = "Password is successfully verified.";
-          } */ 
-          
-          console.log("Received payload:", action.payload);
-            console.log("Before update:", JSON.parse(JSON.stringify(state)));
 
             state.user = action.payload.user; 
             state.token = action.payload.token;
 
             console.log("Updated Redux state:", JSON.parse(JSON.stringify(state)));
         },
-        
+      updateUser: (state, action) => {
+        state.user = action.payload.user; 
+       },
       logOut: (state) => {
           
         state.user = { name: "", email: "", password: "", profile_pic: "" };
@@ -78,6 +69,7 @@ export const  {
   setSuccessMessage,
   emailToLogin,
   passwordToLogin,
+  updateUser,
   logOut 
 } = authSlice.actions; 
 export default  authSlice.reducer;

@@ -240,6 +240,7 @@ const logout = async (req, res) => {
 }
 
 const updateUserDetails = async (req, res) => {
+    
     try {
         const token = req.cookies.token || "";
         console.log("Token from cookies:", token);
@@ -273,21 +274,22 @@ const updateUserDetails = async (req, res) => {
         }
 
         const { name, profile_pic } = req.body;
-        if (!name || !profile_pic) {
+        if (!name /* || !profile_pic */) {
             return res.status(400).json({
-                message: "Name and profile picture are required",
+                /* message: "Name and profile picture are required", */
+                message: "Name is required",
                 error: true
             });
         }
 
         const updatedUser = await User.findByIdAndUpdate(
             user._id,
-            { name, profile_pic },
+            { name, profile_pic: profile_pic || user.profile_pic },
             { new: true }
         );
 
         return res.status(200).json({
-            message: "User information updated successfully",
+            message: "User updated successfully",
             data: updatedUser,
             success: true
         });
