@@ -9,10 +9,10 @@ const app = express();
 
 app.use(cors({
     origin: "http://localhost:3000",
-    credentials: true
+    credentials: true, // Allow cookies to be sent
 }));
 
-const DEFAULT_PORT = process.env.PORT || 5001;
+const DEFAULT_PORT = process.env.PORT;
 let port = DEFAULT_PORT;
 
 app.use(express.json());
@@ -34,13 +34,13 @@ connectDB().then(() => {
     // Handle "port already in use" error
     server.on("error", (err) => {
         if (err.code === "EADDRINUSE") {
-            console.error(`⚠️ Port ${port} is already in use. Trying another port...`);
+            console.error(`Port ${port} is already in use. Trying another port...`);
             port++; 
             server.listen(port, () => {
-                console.log(`✅ Server started on port: ${port}`);
+                console.log(`Server started on port: ${port}`);
             });
         } else {
-            console.error("❌ Server error:", err);
+            console.error("Server error:", err);
         }
     });
 });

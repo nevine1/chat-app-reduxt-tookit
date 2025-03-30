@@ -5,6 +5,7 @@ const {
     loginByEmail,
     loginByPass, 
     resetPass,
+    getToken,
     newPass,
     userDetails,
     logout,
@@ -15,13 +16,14 @@ const {
 
 router.post("/register", registerUser);
 router.post("/loginEmail", loginByEmail);
-router.post("/loginPass", loginByPass)
-//router.post("/loginPass", loginByPass)
+router.post("/loginPass", loginByPass);
+router.get("/getUserToken", getToken)
+
 router.post("/resetPassword", resetPass);
 router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
 router.get("/logout", logout);
-router.post("/update-userInfo", updateUserDetails)
+router.put("/update-userInfo", updateUserDetails)
 
 
 module.exports = router; 

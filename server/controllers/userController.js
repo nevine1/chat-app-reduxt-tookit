@@ -87,45 +87,99 @@ const loginByEmail = async (req, res) => {
 
 
 
-const loginByPass = async (req, res) => {
+/* const loginByPass = async (req, res) => {
     try {
-        const { email, password } = req.body;
-       
-        const user = await User.findOne({ email });
-        
-        if (!user) {
-            console.log("User not found:", email);
-            return res.status(400).json({ message: "User not found" });
+        // Extract the token and password from the request
+        const { token, password } = req.body;
+
+        if (!token || !password) {
+            return res.status(400).json({ message: "Token and password are required" });
         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(400).json({ message: "Incorrect password" });
+        // Verify the token
+        const decoded = jwt.verify(token, 'your_secret_key'); // Replace with your secret key
 
-        const token = jwt.sign(
-            { userId: user._id, email: user.email },
-            process.env.JWT_SECRET_KEY,
-            { expiresIn: "1d" }
-        );
-        console.log("Login successful, token generated.");
+        if (!decoded) {
+            return res.status(401).json({ message: "Invalid token" });
+        }
 
+        // Find the user by ID or username from the decoded token
+        const user = await User.findById(decoded.userId); // Assuming 'userId' is in the token
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Compare the password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Incorrect password" });
+        }
+
+        // Generate an authentication token (you can store this for the session or client)
+        const authToken = jwt.sign({ userId: user._id }, 'your_secret_key', { expiresIn: '1h' });
+
+        // Send success response with the auth token
+        return res.status(200).json({ message: "Login successful", authToken });
+    } catch (error) {
+        console.error("Login error:", error);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+}; */
+
+
+
+const loginByPass = async (req, res) => {
+    try {
+        // Extract email and password from the request
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({ message: "Email and password are required" });
+        }
+
+        // Find the user by email
+        const user = await User.findOne({ email });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Compare the password
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: "Incorrect password" });
+        }
+
+        // Generate a new authentication token
+        const authToken = jwt.sign({ userId: user._id }, 'your_secret_key', { expiresIn: '1h' });
+
+        // Send user data along with the token
         return res.status(200).json({
-            message: "Login successful response is:" + res,
-            success: true,
-            token,
+            message: "Login successful",
+            token: authToken,
             user: {
                 name: user.name,
                 email: user.email,
                 profile_pic: user.profile_pic
             }
         });
-        console.log("response is : ", res.data)
-    } catch (err) {
-        console.error("Error during login:", err);
-        return res.status(500).json({ message: err.message });
+    } catch (error) {
+        console.error("Login error:", error);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };
 
-const resetPass = async (req, res) =>{
+const getToken = (req, res) => {
+    const token = req.cookies.token; // Read token from cookies
+    if (!token) {
+        return res.status(401).json({ message: "Token not found" });
+    }
+    res.json({ token });
+}
+const resetPass = async (req, res) => {
 
     try {
         const user = await User.findOne({ email });
@@ -189,8 +243,8 @@ const userDetails = async (req, res) => {
 
     try{
 
-        const token = req.cookies.token || ""; 
-        console.log(" token is : ", token)
+        const token = req.cookies.token || "";
+        console.log(" cookie token is : ", token)
 
         if(!token){
             return {
@@ -201,7 +255,8 @@ const userDetails = async (req, res) => {
     
         const decode = await jwt.verify(token, process.env.JWT_SECRET_KEY) //this code to decode the information included in the token which is used in login in user
         console.log(decode)
-        const user  = await User.findById(decode.id).select("-password");
+        const user  = await User.findById(decode.userId).select("-password");
+        
         return res.status(200).json({
             message:"getting user details", 
             data: user, 
@@ -227,10 +282,14 @@ const logout = async (req, res) => {
         
         /* res.cookie(token, " ", cookieOptions) */;
 
-        return res.cookie('token', " ", cookieOptions).status(200).json({
+       /*  return res.cookie('token', " ", cookieOptions).status(200).json({
             message: "session expired", 
             success: true
-        })
+        }) */
+        res.clearCookie("token", cookieOptions).status(200).json({
+            message: "Session expired",
+            success: true
+        });
     }catch(err){
         return res.status(500).json({
             message: err.message || err, 
@@ -239,9 +298,11 @@ const logout = async (req, res) => {
     }
 }
 
+
+
 const updateUserDetails = async (req, res) => {
-    
     try {
+        // Extract token from cookies
         const token = req.cookies.token || "";
         console.log("Token from cookies:", token);
 
@@ -254,6 +315,7 @@ const updateUserDetails = async (req, res) => {
 
         let decoded;
         try {
+            console.log("Backend token is:", token);
             decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
         } catch (err) {
             console.error("Token verification error:", err.message);
@@ -265,6 +327,7 @@ const updateUserDetails = async (req, res) => {
 
         console.log("Decoded Token:", decoded);
 
+        // Find user by ID from token
         const user = await User.findById(decoded.id);
         if (!user) {
             return res.status(404).json({
@@ -273,15 +336,16 @@ const updateUserDetails = async (req, res) => {
             });
         }
 
+        // Extract new values from request body
         const { name, profile_pic } = req.body;
-        if (!name /* || !profile_pic */) {
+        if (!name) {
             return res.status(400).json({
-                /* message: "Name and profile picture are required", */
                 message: "Name is required",
                 error: true
             });
         }
 
+        // Update user details
         const updatedUser = await User.findByIdAndUpdate(
             user._id,
             { name, profile_pic: profile_pic || user.profile_pic },
@@ -303,10 +367,14 @@ const updateUserDetails = async (req, res) => {
 };
 
 
+
+
+
 module.exports = {
     registerUser,
     loginByEmail,
     loginByPass,
+    getToken,
     resetPass,
     newPass,
     userDetails, 

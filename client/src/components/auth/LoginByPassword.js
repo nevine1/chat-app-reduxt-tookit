@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Token from './Token';
 import toast from "react-hot-toast";
 import axios from "axios";
 import Image from "next/image";
@@ -8,7 +9,8 @@ import Link from 'next/link'
 import { setIsLoading, 
     setErrorMessage,
     setSuccessMessage,
-    passwordToLogin
+    passwordToLogin,
+    setToken
  } from '../../store/slices/auth/authSlice.js';
     import { useDispatch, useSelector } from 'react-redux'
     import store from '../../store/store.js'
@@ -17,16 +19,16 @@ const LoginByPassword = () => {
     const router = useRouter();
     const dispatch = useDispatch();
     const [password, setPassword] = useState("");
-  const [email, setEmail] = useState("");
-    //const [user, setUser ] =  useState({});
+ 
     const [type, setType] = useState("password")
     const {isLoading,  successMessage, errorMessage, user, token } = useSelector((state) => state.auth)
-    console.log(user)
-    
+    console.log("user from login by password", user)
+    console.log('token coming form loginByEmail to loginByPass', token)
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
     const storedEmail = user?.email || " "
 
-    const handleSubmit = async (e) => {
+    
+    /* const handleSubmit = async (e) => {
 
         e.preventDefault();
         dispatch(setIsLoading(true));
@@ -34,23 +36,29 @@ const LoginByPassword = () => {
         try {
             const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
             const resp = await axios.post(`${URL}/users/loginPass`, {
-                email: storedEmail, 
-                password
-            });
+                email: storedEmail, password
+                }, 
+                {
+                headers: { "Content-Type": "application/json" },
+                withCredentials: true, 
+                }
+                );
             console.log("Response from Login By Password API:", resp.data);
             dispatch(setSuccessMessage("Logged in successfully"));
             toast.success("Logged in successfully");
-            
+            console.log("token from Login By Password API", resp.data.token)
             if (resp.data.token) {
                 dispatch(passwordToLogin({
                     email: storedEmail,
                     password,
-                    token: resp.data.token,
                     user: {
                         name: resp.data.user.name, 
                         profile_pic: resp.data.user.profile_pic,
                     },
+                    token: resp.data.token,
                 }));
+                dispatch(setToken(resp.data.token));
+                
                 }
 
             router.push('/dashboard');
@@ -61,9 +69,53 @@ const LoginByPassword = () => {
         } finally {
             dispatch(setIsLoading(false));
         }
-    };
+    }; */
   
- 
+ const handleSubmit = async (e) => {
+    e.preventDefault();
+    dispatch(setIsLoading(true));
+
+    try {
+        const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
+        const resp = await axios.post(`${URL}/users/loginPass`, {
+            email: storedEmail,
+            password
+        }, {
+            headers: { "Content-Type": "application/json" },
+            withCredentials: true,
+        });
+
+        console.log("Response from Login By Password API:", resp.data);
+        dispatch(setSuccessMessage("Logged in successfully"));
+        toast.success("Logged in successfully");
+
+        if (resp.data.token) {
+            
+            dispatch(passwordToLogin({
+                email: resp.data.user.email,
+                user: {
+                    name: resp.data.user.name,
+                    profile_pic: resp.data.user.profile_pic,
+                },
+                token: resp.data.token,
+            }));
+
+            
+            dispatch(setToken(resp.data.token));
+
+            //localStorage.setItem('authToken', resp.data.token);
+        }
+
+        router.push('/dashboard');
+
+    } catch (err) {
+        toast.error(err?.response?.data?.message || 'Login failed');
+        dispatch(setErrorMessage(err?.response?.data?.message || 'Login failed'));
+    } finally {
+        dispatch(setIsLoading(false));
+    }
+};
+
 
     return (
         <div className="flex justify-center items-center w-screen">

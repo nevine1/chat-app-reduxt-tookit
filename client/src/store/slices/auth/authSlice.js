@@ -31,9 +31,12 @@ const authSlice = createSlice({
           setSuccessMessage: (state, action) => {
             state.successMessage = action.payload;
       },
+      setToken: ( state, action ) => {
+        state.token = action.payload; 
+          },
           
       emailToLogin: (state, action) => {
-        console.log("recieved paylod for email login", action.payload);
+        console.log("received payload for email login", action.payload);
           if (!action.payload || !action.payload.email) return; 
               state.user.email = action.payload.email; 
               state.errorMessage = null;
@@ -41,13 +44,14 @@ const authSlice = createSlice({
            
         }, 
         
-        passwordToLogin : (state, action ) => {
+        passwordToLogin: (state, action) => {
+          state.user.name = action.payload.user.name;
+          state.user.email = action.payload.email; 
+          state.user.profile_pic = action.payload.user.profile_pic;
+          state.token = action.payload.token; 
+          console.log("Updated Redux state:", JSON.parse(JSON.stringify(state)));
+      },
 
-            state.user = action.payload.user; 
-            state.token = action.payload.token;
-
-            console.log("Updated Redux state:", JSON.parse(JSON.stringify(state)));
-        },
       updateUser: (state, action) => {
         state.user = action.payload.user; 
        },
@@ -67,6 +71,7 @@ export const  {
   registerNewUser,
   setErrorMessage,
   setSuccessMessage,
+  setToken,
   emailToLogin,
   passwordToLogin,
   updateUser,
