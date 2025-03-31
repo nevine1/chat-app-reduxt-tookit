@@ -7,8 +7,9 @@ import axios from 'axios';
 
 const EditUserDetails = ({ user, onClose }) => {
   const dispatch = useDispatch();
+  //const { token } = useSelector((state) => state.auth);
   const { token } = useSelector((state) => state.auth);
-
+console.log("my new token comes from redux is", token)
   const profilePic = user?.profile_pic ? `/assets/${user?.profile_pic}` : "/assets/flower.jpg";
   const [uploadPhoto, setUploadPhoto] = useState("");
   const [data, setData] = useState({
@@ -16,7 +17,7 @@ const EditUserDetails = ({ user, onClose }) => {
     name: user?.name ,
   });
 
-  console.log("Token from Redux:", token);
+  
 
   const handleChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -32,27 +33,27 @@ const EditUserDetails = ({ user, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-
+console.log("token from update user info is:", token)
     try {
-      const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/updateUserDetails`;
-      console.log("Sending request to:", URL);
-
+      const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/update-userInfo`;
+      
       const resp = await axios.put(URL, data, {
           withCredentials: true,
           headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,  // Ensure token is passed
           },
         });
 
-      console.log("Updated data:", resp.data);
+      console.log("Updated data :", resp.data);
       dispatch(updateUser({ user: resp.data }));
-
+console.log("response is : ", resp.data)
     } catch (err) {
       console.error("Error updating user:", err.response?.data || err.message);
       console.error("Response Data:", err.response?.data);
       if (err.response?.data?.logout) {
         console.log("Session expired, logging out.");
-        // Handle logout
+        
       }
     }
   };

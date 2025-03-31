@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const verifyToken = require('../middleware/authMiddleware');
 const { 
     registerUser, 
     loginByEmail,
@@ -12,6 +13,8 @@ const {
     updateUserDetails
         } = require('../controllers/userController')
 
+
+
 //creating user api 
 
 router.post("/register", registerUser);
@@ -23,7 +26,7 @@ router.post("/resetPassword", resetPass);
 router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
 router.get("/logout", logout);
-router.put("/update-userInfo", updateUserDetails)
+router.put("/update-userInfo", verifyToken, updateUserDetails)
 
 
 module.exports = router; 
