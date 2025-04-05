@@ -10,12 +10,13 @@ import {store} from '../../store/store'
 import { persistStore } from 'redux-persist';
 import Image from 'next/image'
 import EditUserDetails from '../auth/EditUserDetails';
+import MessageBar from './MessageBar';
 const SideBar = () => {
   const dispatch = useDispatch();
   const { user }  = useSelector((state) => state.auth)
   const router = useRouter();
   const [editUserOpen , setEditUserOpen ] = useState(false)
- 
+  
   const profilePic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";  
   
   const logout = () => {
@@ -26,9 +27,10 @@ const SideBar = () => {
   };
  
   return (
-    <div className="flex flex-col sm:flex-row h-screen">
-      <div className="flex flex-col w-full sm:w-1/6 bg-slate-200 items-center justify-between">
-       
+    <div className="flex flex-col sm:flex-row h-screen bg-slate-100">
+      
+      <div className="flex flex-col w-full sm:w-1/6 h-fll bg-slate-200 items-center justify-between">
+        
         <div className="flex flex-col items-center mx-3 mt-1">
           <Link href="/" className="bg-slate-200 hover:bg-slate-400 p-3 mb-2 rounded-md flex justify-center items-center">
             <BsChatDotsFill size={20} title="Chat" /> 
@@ -41,7 +43,6 @@ const SideBar = () => {
         </div>
         
         
-        <div className="flex-grow"></div> 
         
         <div title="Logout" className="mb-4 flex flex-col items-center -mt-5">
           <button  onClick={() =>setEditUserOpen(true)}>
@@ -68,6 +69,7 @@ const SideBar = () => {
         
         <EditUserDetails onClose={() =>setEditUserOpen(false)}  user={user} /> 
       }
+      <MessageBar/>
     </div>
   );
 };
