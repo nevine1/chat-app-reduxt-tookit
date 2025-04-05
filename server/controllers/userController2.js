@@ -1,6 +1,5 @@
 const express = require('express');
 const User = require('../models/UserModel');
-const getUserDetails = require("../helpers/getUserDetails")
 const multer = require('multer');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -263,60 +262,59 @@ const logout = async (req, res) => {
 
 
 const updateUserDetails = async (req, res) => {
-    console.log("🔥 Incoming request body:", req.body);
-  console.log("🔥 Incoming request file:", req.file);
+    console.log("🔥 Top req.body is:", req.body);
+    console.log("🔥 Top req.file is:", req.file);
 
-  try {
-    // Extract user token from cookies
-    const token = req.cookies.token || "";
-    const user = await getUserDetails(token);
+    try {
+        // Extract token from Authorization header
+        const token = req.headers.authorization?.split(" ")[1]; // Extract token from header
 
-    // Handle cases where user is not found
-    if (!user || user.logout) {
-      return res.status(401).json({
-        message: "Unauthorized: Session expired",
-        error: true,
-        logout: true,
-      });
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+            console.log("✅ Token is valid:", decoded);
+        } catch (error) {
+            console.log("❌ Token verification failed:", error.message);
+            return res.status(401).json({ message: "Invalid or expired token", logout: true });
+        }
+
+        console.log("📌 Decoded Token:", decoded);
+
+        // Find user by ID from token
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found", error: true });
+        }
+
+        console.log("👤 User details before update:", user);
+
+        // Extract new values from request body
+        const { name } = req.body;
+        console.log("📜 Name in req.body:", req.body.name);
+        console.log("📂 Uploaded file:", req.file);
+
+        const profile_pic = req.file ? req.file.filename : user.profile_pic; 
+
+        if (!name) {
+            return res.status(400).json({ message: "Name is required", error: true });
+        }
+
+        // Update user details 
+        const updatedUser = await User.findByIdAndUpdate(
+            user._id,
+            { name, profile_pic },
+            { new: true }
+        );
+
+        return res.status(200).json({
+            message: "✅ User updated successfully",
+            data: updatedUser,
+            success: true
+        });
+    } catch (err) {
+        console.error("💥 Error in updateUserDetails:", err);
+        return res.status(500).json({ message: err.message || "Internal server error", error: true });
     }
-
-    const { name } = req.body;
-    let profile_pic = req.body.profile_pic || user.profile_pic; // Keep old pic if not provided
-
-    // If a new file is uploaded, update the profile picture
-    if (req.file) {
-      profile_pic = req.file.filename; // Assuming multer stores filename
-    }
-
-    // Update user details in DB
-    const updateUser = await User.updateOne(
-      { _id: user._id },
-      { name, profile_pic }
-    );
-
-    // Check if update was successful
-    if (updateUser.modifiedCount === 0) {
-      return res.status(400).json({
-        message: "No changes were made to the user profile",
-        error: true,
-      });
-    }
-
-    // Fetch updated user info
-    const updatedUser = await User.findById(user._id).select("-password");
-
-    return res.json({
-      message: "User updated successfully",
-      data: updatedUser,
-      success: true,
-    });
-  } catch (error) {
-    console.error("🔥 Update error:", error);
-    return res.status(500).json({
-      message: error.message || "Internal Server Error",
-      error: true,
-    });
-  }
 };
 
 

@@ -53,8 +53,13 @@ const authSlice = createSlice({
       },
 
       updateUser: (state, action) => {
-        state.user = action.payload.user; 
-       },
+        if (!action.payload) {
+            console.error("Redux updateUser action received null payload!");
+            return;
+          }
+          state.user = action.payload;
+          console.log("Updated user from Redux:", state.user);
+              },
       logOut: (state) => {
           
         state.user = { name: "", email: "", password: "", profile_pic: "" };

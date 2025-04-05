@@ -14,7 +14,7 @@ const SideBar = () => {
   const dispatch = useDispatch();
   const { user }  = useSelector((state) => state.auth)
   const router = useRouter();
-  const [editUserOpen , setEditUserOpen ] = useState(true)
+  const [editUserOpen , setEditUserOpen ] = useState(false)
  
   const profilePic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";  
   

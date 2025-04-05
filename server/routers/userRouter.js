@@ -1,6 +1,22 @@
-const express = require('express');
+const multer = require("multer");
+const express = require("express");
+const {verifyToken} = require("../middleware/authMiddleware");
+const upload = require("../middleware/multerConfig");
 const router = express.Router();
-const verifyToken = require('../middleware/authMiddleware');
+
+// Multer Configuration
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+
+
+
 const { 
     registerUser, 
     loginByEmail,
@@ -15,6 +31,8 @@ const {
 
 
 
+    
+
 //creating user api 
 
 router.post("/register", registerUser);
@@ -26,7 +44,16 @@ router.post("/resetPassword", resetPass);
 router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
 router.get("/logout", logout);
-router.put("/update-userInfo", verifyToken, updateUserDetails)
 
+/* router.put(
+  "/update-userInfo",
+  verifyToken,
+  upload.single("profile_pic"), // Multer handles file upload
+  updateUserDetails
+); */
+router.put(
+  "/update-userInfo",
+  updateUserDetails
+);
 
 module.exports = router; 

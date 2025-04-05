@@ -20,7 +20,6 @@ const LoginByEmail = () => {
     const dispatch = useDispatch();
     const [email, setEmail] = useState("")
   
-  
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(setIsLoading(true));
@@ -28,7 +27,7 @@ const LoginByEmail = () => {
     try {
         const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
       const response = await axios.post(`${URL}/users/loginEmail`, { email });
-      
+      console.log(response)
       if (!response.data) {
         dispatch(setErrorMessage("Invalid response from server."));
         toast.error("Invalid response from server.")
@@ -58,7 +57,12 @@ const LoginByEmail = () => {
         } else {
             dispatch(setErrorMessage("An error occurred while setting up the request."));
             toast.error("An error occurred while setting up the request.");
-        }
+      }
+      
+      setTimeout(() => {
+            console.log("Timeout reached, resetting isLoading to false");
+            dispatch(setIsLoading(false));
+        }, 5000);
     } finally {
         dispatch(setIsLoading(false));
     }

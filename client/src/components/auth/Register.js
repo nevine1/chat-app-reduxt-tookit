@@ -32,7 +32,7 @@ const Register = () => {
       setUploadPhoto(file);
       setData((prev) => ({
         ...prev,
-        profile_pic: file?.name || "",
+        profile_pic: file || "",
       }));
   };
   

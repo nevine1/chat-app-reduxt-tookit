@@ -1,22 +1,30 @@
 const express = require('express');
-const cors = require('cors');
-const cookiesParser = require("cookie-parser");
+const cors = require("cors");
+const multer = require('multer');
+const cookieParser = require("cookie-parser");
+
+const app = express();
+
+// Middleware to parse JSON and URL-encoded data
+app.use(express.json()); // ✅ Parse JSON requests
+app.use(express.urlencoded({ extended: true })); // ✅ Parse form data
+app.use(cookieParser());
+
+
 require("dotenv").config();
 const connectDB = require('./config/connectDB');
 const routerOfUsers = require('./routers/userRouter');
 
-const app = express();
 
 app.use(cors({
-    origin: "http://localhost:3000",
-    credentials: true, // Allow cookies to be sent
+    origin: "http://localhost:3000",  // Allow frontend
+    credentials: true, // Allow cookies and authorization headers
+    methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
 }));
 
 const DEFAULT_PORT = process.env.PORT;
 let port = DEFAULT_PORT;
-
-app.use(express.json());
-app.use(cookiesParser());
 
 // Users endpoint API
 app.use("/api/users", routerOfUsers);

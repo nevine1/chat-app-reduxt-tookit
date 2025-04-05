@@ -47,7 +47,7 @@ const Navbar = () => {
             ) : (
                <>
                   <Link href="/auth/register">Register</Link>
-                  <Link href="/auth/email">login</Link>
+                  <Link href="/auth/loginEmail">login</Link>
                 </> 
             )
           }
