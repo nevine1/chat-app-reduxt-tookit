@@ -17,10 +17,10 @@ const page = () => {
 
     return (
         <div className="flex flex-col sm:flex-row h-screen ">
-            <div className="w-full sm:w-1/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">
+            <div className="w-full sm:w-1/5 md:w-2/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">
                 <SideBar />
             </div>
-            <div className="w-full sm:w-4/5  p-4 shadow-md">
+            <div className="w-full sm:w-4/5 md:3/5 p-4 shadow-md">
                 
                 <div className="flex flex-col gap-5 justify-center items-center min-h-screen pb-24 mb-20">
                     <Image

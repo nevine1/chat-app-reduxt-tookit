@@ -5,11 +5,11 @@ import SearchFriend from './SearchFriend';
 const MessageBar = () => {
     const [allUsers, setAllUsers ] = useState([])
   return (
-      <div className="w-full">
-          <h1 className="flex  justify-center items-center b w-[100%]  h-14 text-[20px] bg-white">
+      <div className="w-full bg-slate-100">
+          <h1 className="flex  justify-center items-center b w-[100%]  h-14 text-[20px] bg-slate-100">
               Chat
           </h1>
-          <div className="bg-blue-300">
+          <div className="flex justify-center shadow-md py-1">
               <SearchFriend/>
           </div>
           <div className=" w-full">
