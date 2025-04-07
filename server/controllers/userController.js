@@ -319,7 +319,29 @@ const updateUserDetails = async (req, res) => {
   }
 };
 
+const searchForUser = async (req, res) => {
+    try {
+        const { search } = req.body;
+        const query =  new RegExp(search, "i", "g");
+        const user = await User.find({
+            "$or": [
+                { name: query }, 
+                { email: query }
+            ]
+        })
 
+        return res.json({
+            success: true, 
+            data: user,
+            message: "All users "
+        })
+    } catch(error) {
+        return res.status(500).json({
+            error: true, 
+            message: error.message || error 
+        })
+    }
+}
 
 module.exports = {
     registerUser,
@@ -330,5 +352,6 @@ module.exports = {
     newPass,
     userDetails, 
     logout, 
-    updateUserDetails
+    updateUserDetails, 
+    searchForUser
 };

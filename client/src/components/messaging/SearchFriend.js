@@ -1,19 +1,41 @@
-import { useState } from 'react'
+import { useState, useEffect  } from 'react'
 import { IoIosSearch } from "react-icons/io";
 import LoadingSpinner from './LoadingSpinner';
 import UserSearchResult from './UserSearchResult';
+import axios from 'axios'
+import toast from 'react-hot-toast';
 const SearchFriend = () => {
   const [searchUser, setSearchUser] = useState([]);
-  const [loading, setLoading ] = useState(true)
+  const [loading, setLoading] = useState(true);
+  const [searchInput, setSearchInput ] = useState("")
+  
+  const handleSearch = async () => {
+    try {
+      const URL  = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/searchingUser`;
+      const resp = await axios.post(URL, {
+        search: search
+      }
+      )
+
+      setSearchInput(resp?.data.data);
+      toast.success(resp.data.message)
+    } catch (error) {
+      toast.error(error?.resp?.data?.error)
+    }
+  }
+
+  useEffect(() => {
+    handleSearch();
+  }, [])
   return (
     <div className="bg-gray-200 w-full">
       <div className="flex flex-row justify-center items-center">
       
         <input
-          name="search"
+          name="searchInput"
           placeholder='Search'
           className="rounded-full px-3 py-1 m-2 text-gray-500 text-[16px] focus:outline-red-400"
-          
+          onChange={(e) => setSearchInput(e.target.value)}
         />
         <IoIosSearch
           size="25"

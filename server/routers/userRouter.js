@@ -26,7 +26,8 @@ const {
     newPass,
     userDetails,
     logout,
-    updateUserDetails
+  updateUserDetails, 
+    searchForUser
         } = require('../controllers/userController')
 
 
@@ -43,6 +44,7 @@ router.get("/getUserToken", getToken)
 router.post("/resetPassword", resetPass);
 router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
+router.post("/searchingUser", searchForUser);
 router.get("/logout", logout);
 
 /* router.put(
