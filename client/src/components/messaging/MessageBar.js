@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { LuArrowUpLeft } from "react-icons/lu";
-import SearchFriend from './SearchFriend';
+import SearchFriend from './SearchUser';
 
 const MessageBar = () => {
     const [allUsers, setAllUsers ] = useState([])
@@ -10,9 +10,9 @@ const MessageBar = () => {
               Chat
           </h1>
           <div className="flex justify-center shadow-md py-1">
-              <SearchFriend/>
+             {/*  <SearchFriend/> */}
           </div>
-          <div className=" w-full">
+         {/*  <div className=" w-full">
               {
               allUsers.length === 0 && (
                   <div className="flex flex-col justify-center gap-4">
@@ -27,7 +27,7 @@ const MessageBar = () => {
               )
 
           }
-          </div>
+          </div> */}
 
     </div>
   )

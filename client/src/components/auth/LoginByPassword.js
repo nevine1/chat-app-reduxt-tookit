@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Token from './Token';
 import toast from "react-hot-toast";
 import axios from "axios";
 import Image from "next/image";
@@ -19,7 +18,7 @@ const LoginByPassword = () => {
     const router = useRouter();
     const dispatch = useDispatch();
     const [password, setPassword] = useState("");
- 
+    const [showPassword, setShowPassword ] = useState(false)
     const [type, setType] = useState("password")
     const {isLoading,  successMessage, errorMessage, user, token } = useSelector((state) => state.auth)
     console.log("user from login by password", user)
@@ -27,49 +26,6 @@ const LoginByPassword = () => {
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
     const storedEmail = user?.email || " "
 
-    
-    /* const handleSubmit = async (e) => {
-
-        e.preventDefault();
-        dispatch(setIsLoading(true));
-
-        try {
-            const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
-            const resp = await axios.post(`${URL}/users/loginPass`, {
-                email: storedEmail, password
-                }, 
-                {
-                headers: { "Content-Type": "application/json" },
-                withCredentials: true, 
-                }
-                );
-            console.log("Response from Login By Password API:", resp.data);
-            dispatch(setSuccessMessage("Logged in successfully"));
-            toast.success("Logged in successfully");
-            console.log("token from Login By Password API", resp.data.token)
-            if (resp.data.token) {
-                dispatch(passwordToLogin({
-                    email: storedEmail,
-                    password,
-                    user: {
-                        name: resp.data.user.name, 
-                        profile_pic: resp.data.user.profile_pic,
-                    },
-                    token: resp.data.token,
-                }));
-                dispatch(setToken(resp.data.token));
-                
-                }
-
-            router.push('/dashboard');
-            
-        } catch (err) {
-            toast.error(err?.response?.data?.message);
-            dispatch(setErrorMessage(err?.response?.data?.message));
-        } finally {
-            dispatch(setIsLoading(false));
-        }
-    }; */
   
  const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,10 +59,11 @@ const LoginByPassword = () => {
             
             dispatch(setToken(resp.data.token));
 
-            //localStorage.setItem('authToken', resp.data.token);
+            localStorage.setItem('authToken', resp.data.token);
         }
 
-        router.push('/dashboard');
+        //router.push('/dashboard');
+        router.replace('/dashboard');
 
     } catch (err) {
         toast.error(err?.response?.data?.message || 'Login failed');
@@ -152,9 +109,9 @@ const LoginByPassword = () => {
                     />
                     <span 
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-[20px]"
-                        onClick={() => setType(!type)}
+                        onClick={() => setShowPassword(!showPassword)}
                     >
-                        {type ? <FaEyeSlash /> : <FaEye />}
+                        {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                 </div>
 

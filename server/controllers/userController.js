@@ -59,7 +59,7 @@ const loginByEmail = async (req, res) => {
 
     try{
         const { email } = req.body;
-    console.log("req emsil:",req.body);
+    console.log("req email:", req.body);
 
         const user = await User.findOne({email}).select("-password");
         //using select(-password), means do not return password when u login
@@ -321,14 +321,14 @@ const updateUserDetails = async (req, res) => {
 
 const searchForUser = async (req, res) => {
     try {
-        const { search } = req.body;
-        const query =  new RegExp(search, "i", "g");
+        const { searchQuery } = req.body;
+        const query =  new RegExp(searchQuery, "i", "g");
         const user = await User.find({
             "$or": [
                 { name: query }, 
                 { email: query }
             ]
-        })
+        }).select("-password")
 
         return res.json({
             success: true, 

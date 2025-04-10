@@ -9,14 +9,15 @@ import { useRouter } from 'next/navigation'
 import {store} from '../../store/store'
 import { persistStore } from 'redux-persist';
 import Image from 'next/image'
-import EditUserDetails from '../auth/EditUserDetails';
+//import EditUserDetails from '../auth/EditUserDetails';
 import MessageBar from './MessageBar';
+import UserSearchingPage from './UserSearchingPage';
 const SideBar = () => {
   const dispatch = useDispatch();
   const { user }  = useSelector((state) => state.auth)
   const router = useRouter();
-  const [editUserOpen , setEditUserOpen ] = useState(false)
-  
+  //const [editUserOpen , setEditUserOpen ] = useState(false)
+  const [ openSearchBar, setOpenSearchBar ] = useState(false)
   const profilePic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";  
   
   const logout = () => {
@@ -30,16 +31,23 @@ const SideBar = () => {
     <div className="flex flex-col sm:flex-row h-screen bg-slate-100">
       
       <div className="flex flex-col w-full sm:w-1/6 h-fll bg-slate-200 items-center justify-between">
-        
         <div className="flex flex-col items-center mx-3 mt-1">
+          <h1>Hello side barrrrrrrrrrr</h1>
           <Link href="/" className="bg-slate-200 hover:bg-slate-400 p-3 mb-2 rounded-md flex justify-center items-center">
             <BsChatDotsFill size={20} title="Chat" /> 
-            
           </Link>
-          <div title="Add friend" className="mb-4 flex justify-center items-center">
-            <FaUserPlus size={25} />
-        
+          <div title="Find friend" className="mb-4 flex justify-center items-center">
+              <FaUserPlus size={25}
+              onClick={() => setOpenSearchBar(!openSearchBar)} 
+                className="cursor-pointer"
+              />
           </div>
+
+          {openSearchBar && (
+            <div className="absolute bg-white shadow-lg p-4 top-16 left-1/2 transform -translate-x-1/2 w-96 rounded-lg">
+              <UserSearchingPage onClose={() => setOpenSearchBar(!openSearchBar)} />
+            </div>
+          )}
         </div>
         
         
@@ -63,12 +71,9 @@ const SideBar = () => {
           </button>
         </div>
       </div>
-      { /* edit user details */}
-      {
-        editUserOpen &&
-        
-        <EditUserDetails onClose={() =>setEditUserOpen(false)}  user={user} /> 
-      }
+      
+
+     
       <MessageBar/>
     </div>
   );

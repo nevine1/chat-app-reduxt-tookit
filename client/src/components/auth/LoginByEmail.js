@@ -19,13 +19,13 @@ const LoginByEmail = () => {
     const router = useRouter();
     const dispatch = useDispatch();
     const [email, setEmail] = useState("")
-  
+  console.log("Backend URL ===>", process.env.NEXT_PUBLIC_BACK_END_URL);
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(setIsLoading(true));
 
     try {
-        const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
+      const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
       const response = await axios.post(`${URL}/users/loginEmail`, { email });
       console.log(response)
       if (!response.data) {
@@ -59,20 +59,19 @@ const LoginByEmail = () => {
             toast.error("An error occurred while setting up the request.");
       }
       
-      setTimeout(() => {
-            console.log("Timeout reached, resetting isLoading to false");
-            dispatch(setIsLoading(false));
-        }, 5000);
-    } finally {
-        dispatch(setIsLoading(false));
-    }
-};
+      
+      } finally {
+          dispatch(setIsLoading(false));
+      }
+  };
 
   useEffect(() => {
-    dispatch(setErrorMessage(""));
-    dispatch(setSuccessMessage(""))
-   }, [dispatch])
-    
+      if (errorMessage || successMessage) {
+        dispatch(setErrorMessage(""));
+        dispatch(setSuccessMessage(""));
+      }
+    }, []);
+        
   
   return (
     <div className="flex justify-center items-center w-screen">
@@ -96,8 +95,8 @@ const LoginByEmail = () => {
           <button 
             type="submit" 
             disabled={isLoading}
-            className="bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[20px]">
-            { isLoading ? "Loading" : "Let's Check Password" } 
+            className={`bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[20px] ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}>
+            { isLoading ? "Loading..." : "Let's Check Password" } 
           </button>
         </form>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>} 
