@@ -1,14 +1,22 @@
 import React from 'react'
 import { IoMdCloseCircle } from "react-icons/io";
-import SearchUser from './UserSearchingPage'
-const UserSearchingPage = ({onClose}) => {
+import SearchUser from './SearchUser';
+
+const UserSearchingPage = ({ onClose }) => {
   return (
-      <div className="fixed top-0 left-0 bg-red-200 w-full h-screen">
-      <h1>Helloooooooooooooooooooooooooooo </h1>
-      
-      <p onClick={onClose}>Close </p>
+    <div className="fixed inset-0 bg-black bg-opacity-40 z-50 ">
+      <div className="relative w-full h-full overflow-auto ">
+        <div className="flex justify-end p-4">
+          <IoMdCloseCircle
+            onClick={onClose}
+            className="text-white text-3xl cursor-pointer"
+            title="Close"
+          />
         </div>
-  )
-}
+        <SearchUser />
+      </div>
+    </div>
+  );
+};
 
 export default UserSearchingPage;

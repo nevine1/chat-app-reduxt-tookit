@@ -28,10 +28,10 @@ const Navbar = () => {
       <div>
         <Image 
             src={Logo} 
-            width={150} 
-            height={50} 
+            width={130} 
+            height={40} 
             priority={true} 
-            className="w-auto h-auto" 
+            
             alt="logo" 
           />
         {/* <Link className=" text-[24px]" href="/">Chat-App</Link> */}

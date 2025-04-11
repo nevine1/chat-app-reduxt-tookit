@@ -32,7 +32,6 @@ const SideBar = () => {
       
       <div className="flex flex-col w-full sm:w-1/6 h-fll bg-slate-200 items-center justify-between">
         <div className="flex flex-col items-center mx-3 mt-1">
-          <h1>Hello side barrrrrrrrrrr</h1>
           <Link href="/" className="bg-slate-200 hover:bg-slate-400 p-3 mb-2 rounded-md flex justify-center items-center">
             <BsChatDotsFill size={20} title="Chat" /> 
           </Link>
@@ -44,7 +43,7 @@ const SideBar = () => {
           </div>
 
           {openSearchBar && (
-            <div className="absolute bg-white shadow-lg p-4 top-16 left-1/2 transform -translate-x-1/2 w-96 rounded-lg">
+            <div >
               <UserSearchingPage onClose={() => setOpenSearchBar(!openSearchBar)} />
             </div>
           )}
