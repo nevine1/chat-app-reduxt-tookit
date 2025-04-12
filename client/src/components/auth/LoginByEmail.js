@@ -72,7 +72,10 @@ const LoginByEmail = () => {
       }
     }, []);
         
-  
+  useEffect(() => {
+    const emailInput = document.getElementById("email");
+    emailInput?.focus();
+  }, [])
   return (
     <div className="flex justify-center items-center w-screen">
       <div className="flex flex-col justify-center items-center mt-[5%] w-[30%] lg:w-[30%] sm:w-[50%] p-6 bg-white shadow-lg rounded-lg">
@@ -84,6 +87,7 @@ const LoginByEmail = () => {
         <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
           
           <input 
+            id="email"
             name="email" 
             type="email" 
             placeholder="Email..." 

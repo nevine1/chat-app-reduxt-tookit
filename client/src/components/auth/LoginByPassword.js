@@ -73,6 +73,10 @@ const LoginByPassword = () => {
     }
 };
 
+    useEffect(() => {
+        const inputPass = document.getElementById("password");
+        inputPass?.focus();
+    }, [])
 
     return (
         <div className="flex justify-center items-center w-screen">
@@ -100,7 +104,8 @@ const LoginByPassword = () => {
                 <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
                 <div className="relative w-full mb-3">
                     <input 
-                        type={type ? "password" : "text"}
+                        id="password"    
+                        type={ showPassword ? "text" : "password"}
                         value={password}
                         placeholder="Password..."
                         autoComplete="new-password"
@@ -111,7 +116,7 @@ const LoginByPassword = () => {
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-[20px]"
                         onClick={() => setShowPassword(!showPassword)}
                     >
-                        {showPassword ? <FaEyeSlash /> : <FaEye />}
+                        {showPassword ?  <FaEyeSlash /> : <FaEye />}
                     </span>
                 </div>
 
