@@ -16,9 +16,10 @@ const SearchUser = () => {
       setLoading(true);
       const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/searchingUser`;
       const resp = await axios.post(URL, { searchQuery: search });
+      
+     
       setAllUsers(resp?.data.data);
-      /* toast.success(resp.data.message); */
-
+      toast.success(resp.data.message);
     } catch (error) {
 
       toast.error(error?.response?.data?.message || "An error occurred");
@@ -29,16 +30,14 @@ const SearchUser = () => {
   };
 
   useEffect(() => {
-    if (search) {
-      fetchAllUsers();
-    } else {
-      setAllUsers([]);
-    }
-  }, [search]);
-
-  /* useEffect(() => {
+  if (search.length >= 3) {
     fetchAllUsers();
-  }, []) */
+  } else {
+    setAllUsers([]);
+  }
+}, [search]);
+
+ 
   
   return (
     <div className="bg-gray-300 w-[50%] mx-auto p-10 overflow-y-scroll rounded-md">
@@ -47,7 +46,7 @@ const SearchUser = () => {
           <input
             name="searchInput"
             placeholder="Search"
-            className="rounded-full px-3 py-1 m-2 text-gray-500 text-[16px] focus:outline-gray-400"
+            className="rounded-full px-3 py-2 m-2 text-gray-500 text-[16px] focus:outline-gray-400"
             onChange={(e) => setSearch(e.target.value)}
             value={search}
           />
@@ -57,21 +56,18 @@ const SearchUser = () => {
             onClick={fetchAllUsers}
           />
         </div>
-
-        <div className="bg-white p-3 m-3">
-          {/* {!loading && allUsers.length === 0 && <span>No user found</span>} */}
-
-          {loading && (
-            <div className="h-auto m-2">
-              <LoadingSpinner />
-            </div>
+          {!loading && allUsers.length === 0 && search.length >= 3 && (
+            <span className="text-red-600">No user found</span>
           )}
-<LoadingSpinner />
-          {!loading &&
+                  <div className={`${allUsers.length > 0 ? " m-3 p-5 " : "bg-red-500 "}  `}>
+         
+          { !loading &&
             allUsers.map((user, index) => (
-              <div key={index} className="mx-4 my-2">
+              <div key={index} className="mx-4 my-2 bg-white rounded-md w-full">
                 <SearchUserCard user={user} />
               </div>
+          
+            
             ))}
         </div>
       </div>

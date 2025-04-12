@@ -10,7 +10,6 @@ const page = () => {
     
     const router = useRouter();
     const {user} = useSelector((state) => state.auth);
-    console.log("User in Dashboard:", user);
 
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
     const userName = user?.name || "User";

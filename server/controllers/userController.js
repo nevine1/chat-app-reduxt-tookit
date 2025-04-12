@@ -322,7 +322,13 @@ const updateUserDetails = async (req, res) => {
 const searchForUser = async (req, res) => {
     try {
         const { searchQuery } = req.body;
-        const query =  new RegExp(searchQuery, "i", "g");
+        if (!searchQuery || searchQuery.length < 3) {
+            return res.status(400).json({
+                success: false,
+                message: "Search name should not be less than 3 characters "
+            })
+        }
+        const query =  new RegExp(searchQuery, "i");
         const user = await User.find({
             "$or": [
                 { name: query }, 
@@ -333,7 +339,7 @@ const searchForUser = async (req, res) => {
         return res.json({
             success: true, 
             data: user,
-            message: "All users "
+            message: "Matching users found"
         })
     } catch(error) {
         return res.status(500).json({
