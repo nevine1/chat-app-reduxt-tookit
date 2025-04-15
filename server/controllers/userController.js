@@ -322,6 +322,7 @@ const updateUserDetails = async (req, res) => {
 const searchForUser = async (req, res) => {
     try {
         const { searchQuery } = req.body;
+      
         if (!searchQuery || searchQuery.length < 3) {
             return res.status(400).json({
                 success: false,
@@ -336,11 +337,20 @@ const searchForUser = async (req, res) => {
             ]
         }).select("-password")
 
-        return res.json({
+        if (searchQuery) {
+            return res.json({
             success: true, 
             data: user,
-            message: "Matching users found"
+            message: `${searchQuery} is found`
         })
+        }
+
+        /* return res.json({
+            success: true, 
+            data: user,
+            message: `${searchQuery} is found`
+        }) */
+      
     } catch(error) {
         return res.status(500).json({
             error: true, 

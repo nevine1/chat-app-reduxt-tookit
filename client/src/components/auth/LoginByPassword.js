@@ -102,7 +102,7 @@ const LoginByPassword = () => {
                 <h1 className="text-md font-semibold mb-4 text-gray-700">Enter Your Password</h1>
 
                 <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
-                <div className="relative w-full mb-3">
+                <div className="relative w-full mb-4">
                     <input 
                         id="password"    
                         type={ showPassword ? "text" : "password"}
@@ -110,7 +110,7 @@ const LoginByPassword = () => {
                         placeholder="Password..."
                         autoComplete="new-password"
                         onChange={(e) => setPassword(e.target.value)}
-                        className="p-3 border w-full rounded text-gray-500 focus:outline-primary-dark bg-primary-light pr-10" 
+                        className="p-3  border w-full rounded text-gray-500 focus:outline-primary-dark bg-primary-light pr-10" 
                     />
                     <span 
                         className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 cursor-pointer text-[20px]"
@@ -122,7 +122,7 @@ const LoginByPassword = () => {
 
                     <button type="submit"
                         disabled={isLoading}
-                        className="bg-primary text-white py-2 px-4 mb-3 rounded text-bold text-[20px]">
+                        className="bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[20px]">
                         { isLoading? "Loading..." : "Login"}
                     </button>
                     {/* <p className="text-[15px] text-primary mb-6 text-center">

@@ -5,6 +5,7 @@ import SearchUserCard from './SearchUserCard';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
+let debounceTimeout = null;
 const SearchUser = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -17,7 +18,6 @@ const SearchUser = () => {
       const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/searchingUser`;
       const resp = await axios.post(URL, { searchQuery: search });
       
-     
       setAllUsers(resp?.data.data);
       toast.success(resp.data.message);
     } catch (error) {
@@ -29,13 +29,20 @@ const SearchUser = () => {
     }
   };
 
-  useEffect(() => {
-  if (search.length >= 3) {
-    fetchAllUsers();
-  } else {
-    setAllUsers([]);
-  }
-}, [search]);
+    useEffect(() => {
+    if (search.length >= 3) {
+      clearTimeout(debounceTimeout);
+      debounceTimeout = setTimeout(() => {
+        fetchAllUsers();
+      }, 500); // debounce delay
+    } else {
+      setAllUsers([]);
+    }
+
+    // Cleanup on unmount
+    return () => clearTimeout(debounceTimeout);
+  }, [search]);
+
 
  
   
