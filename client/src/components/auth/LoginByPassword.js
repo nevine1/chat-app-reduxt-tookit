@@ -82,7 +82,7 @@ const LoginByPassword = () => {
         <div className="flex justify-center items-center w-screen">
             <div className="flex flex-col justify-center items-center py-5 mt-[5%] w-[30%] lg:w-[30%] p-6 bg-white shadow-lg rounded-lg">
             {
-                 user && <h1 className="text-lg font-semibold mb-4 text-primary">Welcome {user.name } </h1>
+                 user && <h1 className="text-lg font-semibold my-4 text-primary">Welcome {user.name } </h1>
             }
                 
                 {
@@ -91,9 +91,9 @@ const LoginByPassword = () => {
                     <Image 
                     src={profile_pic} 
                     alt="profile pic "
-                    width={70}
-                    height={70}
-                    className="rounded-full h-8 w-8"
+                    width={90}
+                    height={90}
+                    className="rounded-full h-12 w-12 mb-4"
                     priority
                 />
 
@@ -102,7 +102,7 @@ const LoginByPassword = () => {
                 <h1 className="text-md font-semibold mb-4 text-gray-700">Enter Your Password</h1>
 
                 <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
-                <div className="relative w-full mb-4">
+                <div className="relative w-full mb-5 mt-4">
                     <input 
                         id="password"    
                         type={ showPassword ? "text" : "password"}
@@ -122,7 +122,7 @@ const LoginByPassword = () => {
 
                     <button type="submit"
                         disabled={isLoading}
-                        className="bg-primary text-white py-2 px-4 mb-4 rounded text-bold text-[20px]">
+                        className="bg-primary text-white py-2 px-4 mb-9 rounded text-bold text-[20px]">
                         { isLoading? "Loading..." : "Login"}
                     </button>
                     {/* <p className="text-[15px] text-primary mb-6 text-center">

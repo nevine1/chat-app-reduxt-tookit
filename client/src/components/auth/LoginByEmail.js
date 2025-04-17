@@ -81,7 +81,7 @@ const LoginByEmail = () => {
       <div className="flex flex-col justify-center items-center mt-[5%] w-[30%] lg:w-[30%] sm:w-[50%] p-6 bg-white shadow-lg rounded-lg">
         <div className="flex flex-col gap-4 items-center mt-3">
             <FaUserTie className="text-[50px] text-gray-500"/>
-            <h1 className="text-lg font-semibold mb-4 text-primary">Welcome to chat-app</h1>
+            <h1 className="text-lg font-semibold mb-5 text-primary">Welcome to chat-app</h1>
         </div>
         
         <form className="flex flex-col gap-4 w-full px-4" onSubmit={handleSubmit}>
@@ -92,7 +92,7 @@ const LoginByEmail = () => {
             type="email" 
             placeholder="Email..." 
             onChange={(e) => setEmail(e.target.value)}
-            className="p-3 border rounded mb-3 text-gray-500 focus:outline-primary-dark bg-primary-light" 
+            className="p-3 border rounded mb-5 text-gray-500 focus:outline-primary-dark bg-primary-light" 
             autoComplete="off"
             />
 
@@ -105,7 +105,7 @@ const LoginByEmail = () => {
         </form>
         {errorMessage && <p className="text-red-500">{errorMessage}</p>} 
         {successMessage && <p className="text-green-500">{successMessage}</p>}
-        <p className="text-gray-600 text-[16px] my-2">
+        <p className="text-gray-600 text-[16px] mt-4 mb-5">
           New User:   
           <Link href="/auth/register" className="text-primary"> SignUp</Link>
         </p>

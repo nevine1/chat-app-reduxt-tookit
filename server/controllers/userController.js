@@ -330,26 +330,26 @@ const searchForUser = async (req, res) => {
             })
         }
         const query =  new RegExp(searchQuery, "i");
-        const user = await User.find({
+        const users = await User.find({
             "$or": [
                 { name: query }, 
                 { email: query }
             ]
         }).select("-password")
 
-        if (searchQuery) {
+        if (users.length > 0) {
             return res.json({
             success: true, 
-            data: user,
-            message: `${searchQuery} is found`
+            data: users,
+            message: `${searchQuery}  found`
         })
+        } else {
+            return res.json({
+                message: `${searchQuery} not found`
+            })
         }
 
-        /* return res.json({
-            success: true, 
-            data: user,
-            message: `${searchQuery} is found`
-        }) */
+       
       
     } catch(error) {
         return res.status(500).json({

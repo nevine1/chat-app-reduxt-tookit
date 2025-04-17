@@ -18,8 +18,14 @@ const SearchUser = () => {
       const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/searchingUser`;
       const resp = await axios.post(URL, { searchQuery: search });
       
-      setAllUsers(resp?.data.data);
-      toast.success(resp.data.message);
+      setAllUsers(resp?.data.data || []);
+     
+
+      if (resp.data.success) { //if users found
+        toast.success(resp.data.message);
+      } else {
+        toast.error(resp.data.message);
+      }
     } catch (error) {
 
       toast.error(error?.response?.data?.message || "An error occurred");
@@ -34,12 +40,12 @@ const SearchUser = () => {
       clearTimeout(debounceTimeout);
       debounceTimeout = setTimeout(() => {
         fetchAllUsers();
-      }, 500); // debounce delay
+      }, 500); 
     } else {
       setAllUsers([]);
     }
 
-    // Cleanup on unmount
+    
     return () => clearTimeout(debounceTimeout);
   }, [search]);
 
@@ -64,9 +70,9 @@ const SearchUser = () => {
           />
         </div>
           {!loading && allUsers.length === 0 && search.length >= 3 && (
-            <span className="text-red-600">No user found</span>
+            <span className="text-red-600">{search} not found</span>
           )}
-                  <div className={`${allUsers.length > 0 ? " m-3 p-5 " : "bg-red-500 "}  `}>
+              <div className={`${allUsers.length > 0 ? " m-3 p-5 " : "bg-red-500 "}  `}>
          
           { !loading &&
             allUsers.map((user, index) => (
