@@ -5,13 +5,13 @@ import SearchUserCard from './SearchUserCard';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 
-let debounceTimeout = null;
+let fetchAllUsers = null;
 const SearchUser = () => {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchAllUsers = async () => {
+  /* const fetchAllUsers = async () => {
     try {
 
       setLoading(true);
@@ -30,28 +30,65 @@ const SearchUser = () => {
 
       toast.error(error?.response?.data?.message || "An error occurred");
       console.log(error?.response?.data?.message);
+
     } finally {
       setLoading(false);
     }
   };
 
-    useEffect(() => {
+  useEffect(() => {
+      
     if (search.length >= 3) {
-      clearTimeout(debounceTimeout);
-      debounceTimeout = setTimeout(() => {
+      clearTimeout(getAllUsers);
+      getAllUsers = setTimeout(() => {
         fetchAllUsers();
       }, 500); 
+
     } else {
+
       setAllUsers([]);
     }
-
     
-    return () => clearTimeout(debounceTimeout);
-  }, [search]);
+      return () => clearTimeout(getAllUsers);
+      
+  }, [search]); */
 
 
  
-  
+  useEffect(() => {
+
+  if (search.length >= 3) {
+    //clearTimeout(fetchAllUsers);
+    fetchAllUsers = setTimeout(async () => {
+      try {
+        setLoading(true);
+        const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users/searchingUser`;
+        const resp = await axios.post(URL, { searchQuery: search });
+        
+        setAllUsers(resp?.data.data || []);
+
+        if (resp.data.success) {
+          //toast.dismiss(); 
+          toast.success(resp.data.message);
+        } else {
+          //toast.dismiss();
+          toast.error(resp.data.message);
+        }
+      } catch (error) {
+        //toast.dismiss();
+        toast.error(error?.response?.data?.message || "An error occurred");
+        setAllUsers([]);
+      } finally {
+        setLoading(false);
+      }
+    }, 500);
+  } else {
+    setAllUsers([]);
+  }
+
+  return () => clearTimeout(fetchAllUsers);
+}, [search]);
+
   return (
     <div className="bg-gray-300 w-[50%] mx-auto p-10 overflow-y-scroll rounded-md">
       <div className="flex flex-col items-center">
@@ -66,7 +103,7 @@ const SearchUser = () => {
           <IoIosSearch
             size="25"
             className="text-gray-500 cursor-pointer -ml-10"
-            onClick={fetchAllUsers}
+            /* onClick={fetchAllUsers} */
           />
         </div>
           {!loading && allUsers.length === 0 && search.length >= 3 && (

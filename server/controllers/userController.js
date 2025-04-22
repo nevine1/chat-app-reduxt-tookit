@@ -342,7 +342,7 @@ const searchForUser = async (req, res) => {
             success: true, 
             data: users,
             message: `${searchQuery}  found`
-        })
+            })
         } else {
             return res.json({
                 message: `${searchQuery} not found`
