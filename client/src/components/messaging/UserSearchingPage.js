@@ -13,7 +13,7 @@ const UserSearchingPage = ({ onClose }) => {
             title="Close"
           />
         </div>
-        <SearchUser />
+        <SearchUser onClose={onClose}  />
       </div>
     </div>
   );
