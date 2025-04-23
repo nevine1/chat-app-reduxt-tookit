@@ -16,6 +16,7 @@ export default {
           light: "rgb(153 222 225 / 20%)"
         }
       },
+      /* scale: 1.4, */
     }, 
   },
   plugins: [],
