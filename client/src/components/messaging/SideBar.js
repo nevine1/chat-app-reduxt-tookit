@@ -12,14 +12,14 @@ import Image from 'next/image'
 //import EditUserDetails from '../auth/EditUserDetails';
 import MessageBar from './MessageBar';
 import UserSearchingPage from './UserSearchingPage';
-const SideBar = () => {
+const SideBar = ({onSelectUser}) => {
   const dispatch = useDispatch();
   const { user }  = useSelector((state) => state.auth)
   const router = useRouter();
   //const [editUserOpen , setEditUserOpen ] = useState(false)
   const [ openSearchBar, setOpenSearchBar ] = useState(false)
   const profilePic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";  
-  
+   const [selectedUserId, setSelectedUserId ] = useState(null)
   const logout = () => {
     dispatch(logOut()); 
     const persistor = persistStore(store); 
@@ -44,7 +44,9 @@ const SideBar = () => {
 
           {openSearchBar && (
             <div >
-              <UserSearchingPage onClose={() => setOpenSearchBar(!openSearchBar)} />
+              <UserSearchingPage onClose={() => setOpenSearchBar(!openSearchBar)}
+                onSelectUser={selectedUserId}
+              />
             </div>
           )}
         </div>
@@ -72,8 +74,19 @@ const SideBar = () => {
       </div>
       
 
-     
-      <MessageBar/>
+      <div className="w-full sm:w-4/5 md:3/5 p-4 shadow-md">
+        {selectedUserId ? (
+          <MessageBar selectedUserId={selectedUserId} />
+        ) : (
+          <div className="flex flex-col gap-5 justify-center items-center min-h-screen pb-24 mb-20">
+            {/* <Image src={logoImg} alt="Logo" width={250} height={100} /> */}
+            <h2 className="text-gray-600 text-[18px]">
+              {user?.name}, you can select your friend to start chatting here.
+            </h2>
+          </div>
+        )}
+      </div>
+      
     </div>
   );
 };

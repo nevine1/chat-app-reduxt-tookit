@@ -6,7 +6,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 
 let getAllUsers = null;
-const SearchUser = ({onClose}) => {
+const SearchUser = ({onClose, onSelectUser }) => {
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -91,7 +91,7 @@ const SearchUser = ({onClose}) => {
           { !loading &&
             allUsers.map((user, index) => (
               <div key={index} className="mx-4 my-2 bg-white shadow-sm shadow-black rounded-md w-full">
-                <SearchUserCard user={user} onClos={onClose} />
+                <SearchUserCard user={user} onClos={onClose} onSelectUser={onSelectUser} />
               </div>
           
             
