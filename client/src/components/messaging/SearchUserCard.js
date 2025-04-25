@@ -4,17 +4,15 @@ import React from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 
-const SearchUserCard = ({ user, onClose, onSelectUser }) => {
+const SearchUserCard = ({ user, onClose }) => {
 console.log(user)
   const userPic = user?.profile_pic ? `/assets/${user?.profile_pic}` : "/assets/flower.jpg";
 
   console.log('user id is', user?._id)
-  const handleClick = () => {
-    onSelectUser(user?._id);
-    onClose();
-  }
+  
   return (
-    <Link href={`/dashboard/${user?._id}`} onClick={handleClick} >
+    <Link href={`/dashboard/${user?._id}`} onClick={onClose} passHref>
+    
       <div className="flex    items-center   px-4 w-full  border-b-2 border-slate-200
       hover:border hover:border-blue-400  hover:rounded-md cursor-pointer
       ">
