@@ -26,15 +26,16 @@ const Navbar = () => {
   return (
     <div className="flex flex-row justify-between bg-white items-center h-20 border-b-black px-10 shadow-md ">
       <div>
-        <Image 
-            src={Logo} 
-            width={130} 
-            height={40} 
-            priority={true} 
-            
-            alt="logo" 
-          />
-        {/* <Link className=" text-[24px]" href="/">Chat-App</Link> */}
+        <Link className=" text-[24px]" href="/">
+          <Image 
+              src={Logo} 
+              width={130} 
+              height={40} 
+              priority={true} 
+              
+              alt="logo" 
+            />
+         </Link> 
       </div>
       <nav >
         <ul className="flex flex-row gap-4">

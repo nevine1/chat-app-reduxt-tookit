@@ -23,37 +23,42 @@ const SideBar = () => {
   };
 
   return (
-    <div className="flex flex-col w-full items-center justify-between h-full bg-slate-200">
-      <div className="flex flex-col items-center mt-4">
-        <FaUserPlus
-          size={25}
-          onClick={() => setOpenSearchBar(!openSearchBar)}
-          className="cursor-pointer mb-4"
-          title="Find friend"
-        />
-        {openSearchBar && (
-
-          <UserSearchingPage
-            onClose={() => setOpenSearchBar(false)}
+    <div className="flex  w-full items-center  h-full bg-slate-200">
+      <div className="flex flex-col justify-between items-center mt-4 w-1/5 h-full">
+        <div >
+          <FaUserPlus
+            size={25}
+            onClick={() => setOpenSearchBar(!openSearchBar)}
+            className="cursor-pointer mb-4"
+            title="Find friend"
           />
-        )}
+          {openSearchBar && (
 
+            <UserSearchingPage
+              onClose={() => setOpenSearchBar(false)}
+            />
+          )}
+
+        </div>
+
+        <div className="mb-4 flex flex-col items-center">
+          <Image
+            src={profilePic}
+            width={35}
+            height={35}
+            alt={user?.name}
+            className="rounded-full h-6 w-6"
+          />
+          <button
+            onClick={logout}
+            className="p-2 mt-2 rounded-md bg-slate-200 hover:bg-slate-400"
+          >
+            Logout
+          </button>
+        </div>
       </div>
-
-      <div className="mb-4 flex flex-col items-center">
-        <Image
-          src={profilePic}
-          width={35}
-          height={35}
-          alt={user?.name}
-          className="rounded-full h-6 w-6"
-        />
-        <button
-          onClick={logout}
-          className="p-2 mt-2 rounded-md bg-slate-200 hover:bg-slate-400"
-        >
-          Logout
-        </button>
+      <div className="flex bg-slate-100 w-4/5 h-full shadow-lg p-10">
+        <h1>Messages</h1>
       </div>
     </div>
   );

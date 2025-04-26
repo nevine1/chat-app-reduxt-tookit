@@ -8,8 +8,8 @@ const ChatPage  = () => {
     
     console.log(userId)
  return (
-    <div className="flex h-screen">
-      <div className="w-full sm:w-1/5 md:w-2/5 h-full bg-slate-100 shadow-md">
+    <div className="flex flex-col sm:flex-row h-full">
+     <div className="w-full sm:w-1/5 md:w-2/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">
         <SideBar />
       </div>
       <div className="w-full sm:w-4/5 md:3/5 p-4 shadow-md">
