@@ -24,8 +24,8 @@ const SideBar = () => {
 
   return (
     <div className="flex  w-full items-center  h-full bg-slate-200">
-      <div className="flex flex-col justify-between items-center mt-4 w-1/5 h-full">
-        <div >
+      <div className="flex flex-col justify-between items-center mt-4 w-1/6 h-full">
+        <div className="py-4 ">
           <FaUserPlus
             size={25}
             onClick={() => setOpenSearchBar(!openSearchBar)}
@@ -57,7 +57,7 @@ const SideBar = () => {
           </button>
         </div>
       </div>
-      <div className="flex bg-slate-100 w-4/5 h-full shadow-lg p-10">
+      <div className="flex bg-slate-100 w-5/6 h-full shadow-lg p-10">
         <h1>Messages</h1>
       </div>
     </div>

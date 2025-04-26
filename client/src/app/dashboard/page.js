@@ -6,6 +6,7 @@ import MessageBar  from '../../components/messaging/MessageBar'
 import { useSelector } from 'react-redux'
 import Image from "next/image";
 import logoImg from '../../../public/assets/logo.png'
+
 const page = () => {
    
     const {user} = useSelector((state) => state.auth);
