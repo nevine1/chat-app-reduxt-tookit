@@ -4,7 +4,8 @@ import { useParams } from 'next/navigation';
 import MessageBar from '@/components/messaging/MessageBar';
 import SideBar from '@/components/messaging/SideBar';
 const ChatPage  = () => {
-    const { userId } = useParams(); 
+  const { userId } = useParams(); 
+  
     
     console.log(userId)
  return (

@@ -4,11 +4,11 @@ const cors = require("cors");
 const multer = require('multer');
 const cookieParser = require("cookie-parser");
 
-/* const app = express(); */
+//const app = express();
 
 // Middleware to parse JSON and URL-encoded data
-app.use(express.json()); // ✅ Parse JSON requests
-app.use(express.urlencoded({ extended: true })); // ✅ Parse form data
+app.use(express.json()); // Parse JSON requests
+app.use(express.urlencoded({ extended: true })); //  Parse form data
 app.use(cookieParser());
 
 
@@ -18,11 +18,12 @@ const routerOfUsers = require('./routers/userRouter');
 
 
 app.use(cors({
-    origin: process.env.FRONTEND_URL,  // Allow frontend
+    origin: "http://localhost:3000",  // Allow frontend
     credentials: true, // Allow cookies and authorization headers
     methods: ["GET", "POST", "PUT", "DELETE"], // Allow these methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
 }));
+
 
 const DEFAULT_PORT = process.env.PORT;
 let port = DEFAULT_PORT;
@@ -36,8 +37,9 @@ app.get("/", (req, res) => {
 });
 
 connectDB().then(() => {
+    /* const server = app.listen(port, () => { */
     server.listen(port, () => {
-        console.log(`✅ Serverrrrrrrrrrrrrrrrrrrrrrrr is running on port: ${port}`);
+        console.log(`✅ Server is running on port: ${port}`);
     });
 
     // Handle "port already in use" error

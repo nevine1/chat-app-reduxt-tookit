@@ -13,7 +13,7 @@ import { setIsLoading,
  } from '../../store/slices/auth/authSlice.js';
     import { useDispatch, useSelector } from 'react-redux'
     import store from '../../store/store.js'
-import io from 'socket.io-client'
+/* import io from 'socket.io-client' */
 const LoginByPassword = () => {
     const router = useRouter();
     const dispatch = useDispatch();
@@ -58,7 +58,7 @@ const LoginByPassword = () => {
 
             
             dispatch(setToken(resp.data.token));
-
+            console.log(token)
             localStorage.setItem('authToken', resp.data.token);
         }
 
@@ -73,14 +73,7 @@ const LoginByPassword = () => {
     }
 };
 
-    /* socket connection  */
-    useEffect(() => {
-        const socketConnection = io(process.env.NEXT_PUBLIC_BACK_END_URL, {
-            auth: localStorage.get('token')
-        })
-
-        return () => socketConnection.disconnect();
-    }, [])
+   
     useEffect(() => {
         const inputPass = document.getElementById("password");
         inputPass?.focus();

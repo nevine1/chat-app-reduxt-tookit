@@ -33,6 +33,7 @@ const authSlice = createSlice({
       },
       setToken: ( state, action ) => {
         state.token = action.payload; 
+        console.log(state.token)
           },
           
       emailToLogin: (state, action) => {
@@ -50,6 +51,7 @@ const authSlice = createSlice({
           state.user.profile_pic = action.payload.user.profile_pic;
           state.token = action.payload.token; 
           console.log("Updated Redux state:", JSON.parse(JSON.stringify(state)));
+          console.log(state.token)
       },
 
       updateUser: (state, action) => {

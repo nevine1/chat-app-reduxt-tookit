@@ -6,13 +6,29 @@ import MessageBar  from '../../components/messaging/MessageBar'
 import { useSelector } from 'react-redux'
 import Image from "next/image";
 import logoImg from '../../../public/assets/logo.png'
-
+import io from 'socket.io-client'
 const page = () => {
    
     const {user} = useSelector((state) => state.auth);
-   
-    /* const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
-    const userName = user?.name || "User"; */
+   console.log('user details is : ', user)
+    const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
+  
+    useEffect(() => {
+        
+        const socketConnection = io(process.env.NEXT_PUBLIC_BACK_END_URL, {
+
+            auth: {
+                authToken: localStorage.getItem("authToken")
+            }
+        });
+        socketConnection.on(`onlineUser`, (data) => {
+            console.log(data)
+        })
+        // if connection failed 
+        return () => {
+            socketConnection.disconnect();
+        }
+    }, [])
 
     return (
         <div className="flex flex-col sm:flex-row h-full">
@@ -30,6 +46,14 @@ const page = () => {
                         
                     />
                     <h2 className="text-gray-600 text-[18px]">{user.name}, you can select your friend to start chat here </h2>
+                    <h2>{user.email}</h2>
+                    <Image
+                        src={profile_pic}
+                        alt={`picture of ${user.name}`}
+                        width={100}
+                        height={100}
+                        className="h-[100px] w-[100px] rounded-md"
+                    />
                 </div>
             </div>
 

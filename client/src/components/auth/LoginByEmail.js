@@ -13,7 +13,7 @@ import {
   emailToLogin,
   } from '../../store/slices/auth/authSlice.js';
 import { useDispatch, useSelector } from 'react-redux'
-import io from 'socket.io-client'
+
 import store from '../../store/store.js'
 const LoginByEmail = () => {
     const { isLoading, error, successMessage, errorMessage, user } = useSelector((state) => state.auth);
@@ -28,6 +28,7 @@ const LoginByEmail = () => {
     try {
       const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
       const response = await axios.post(`${URL}/users/loginEmail`, { email });
+      console.log("BACKEND URL trying to connect:", `${URL}/users/loginEmail`);
       console.log(response)
       if (!response.data) {
         dispatch(setErrorMessage("Invalid response from server."));
