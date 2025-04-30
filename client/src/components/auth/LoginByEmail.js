@@ -20,13 +20,15 @@ const LoginByEmail = () => {
     const router = useRouter();
     const dispatch = useDispatch();
     const [email, setEmail] = useState("")
-  console.log("Backend URL ===>", process.env.NEXT_PUBLIC_BACK_END_URL);
+ 
   const handleSubmit = async (e) => {
     e.preventDefault();
     dispatch(setIsLoading(true));
 
     try {
       const URL = process.env.NEXT_PUBLIC_BACK_END_URL;
+                               
+      
       const response = await axios.post(`${URL}/users/loginEmail`, { email });
       console.log("BACKEND URL trying to connect:", `${URL}/users/loginEmail`);
       console.log(response)

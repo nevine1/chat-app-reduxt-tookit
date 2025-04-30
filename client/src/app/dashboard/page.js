@@ -9,11 +9,13 @@ import logoImg from '../../../public/assets/logo.png'
 import io from 'socket.io-client'
 const page = () => {
    
-    const {user} = useSelector((state) => state.auth);
+    const { user } = useSelector((state) => state.auth);
+     const backendUrl = process.env.NEXT_PUBLIC_BACK_END_URL;
+    const [socket, setSocket] = useState(null);
    console.log('user details is : ', user)
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
   
-    useEffect(() => {
+   /*  useEffect(() => {
         
         const socketConnection = io(process.env.NEXT_PUBLIC_BACK_END_URL, {
 
@@ -21,6 +23,8 @@ const page = () => {
                 authToken: localStorage.getItem("authToken")
             }
         });
+
+        setTimeout(socketConnection, 500)
         socketConnection.on(`onlineUser`, (data) => {
             console.log(data)
         })
@@ -28,8 +32,45 @@ const page = () => {
         return () => {
             socketConnection.disconnect();
         }
-    }, [])
+    }, []) */
+    useEffect(() => {
+    
+    const connectSocket = () => {
+            
+            if (user?.authToken && backendUrl) {
+                const newSocket = io(backendUrl, {
+                    auth: {
+                        authToken: user.authToken, // Use the authToken from  Redux store
+                    },
+                    transports: ['websocket'] // Explicitly try WebSocket first
+                });
 
+                setSocket(newSocket);
+
+                newSocket.on(`onlineUser`, (data) => {
+                    console.log("Online Users:", data);
+                });
+
+                newSocket.on('connect_error', (error) => {
+                    console.error("Socket connection error:", error);
+                });
+
+                newSocket.on('disconnect', () => {
+                    console.log("Socket disconnected");
+                });
+            }
+        };
+
+        
+        const timer = setTimeout(connectSocket, 500);
+
+        return () => {
+            clearTimeout(timer); // Clear the timeout if the component unmounts
+            if (socket) {
+                socket.disconnect();
+            }
+        };
+    }, [user?.authToken, backendUrl]); 
     return (
         <div className="flex flex-col sm:flex-row h-full">
             <div className="w-full sm:w-1/5 md:w-2/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">
