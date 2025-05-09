@@ -1,12 +1,13 @@
 const express = require('express');
+const app = express();
+const { socketServer} = require("./socket/index")
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const connectDB = require('./config/connectDB');
 const routerOfUsers = require('./routers/userRouter');
-const socketServer = require('./socket/index'); // Import the socket server function
 
-const app = express(); // Create the Express app
+
 
 // Middleware
 app.use(express.json());
@@ -26,11 +27,12 @@ app.get("/", (req, res) => {
     console.log(req.url);
 });
 
+const server = socketServer(app);
 const DEFAULT_PORT = process.env.PORT || 5000; // Add a default port
 let port = DEFAULT_PORT;
 
 connectDB().then(() => {
-    const server = socketServer(app); // Pass the Express app to the socket server
+    
     server.listen(port, () => {
         console.log(`✅ Server is running on port: ${port}`);
     });
@@ -47,3 +49,4 @@ connectDB().then(() => {
         }
     });
 });
+

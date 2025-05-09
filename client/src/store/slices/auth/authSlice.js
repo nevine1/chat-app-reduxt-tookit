@@ -7,11 +7,13 @@ const initialState = {
     email: "", 
     password: "", 
     profile_pic: "",
+    
         },
         token: null,
         isLoading: false,
         errorMessage: "",
         successMessage: "",  
+        onlineUsers: []
   }
 const authSlice = createSlice({
     name: "auth",
@@ -68,7 +70,12 @@ const authSlice = createSlice({
         state.token = null; 
         state.successMessage = "Logged out successfully";
             
-        }
+      }, 
+      setOnlineUsers: (state, action) => {
+        state.onlineUsers = action.payload;
+        console.log('this is online users in authSlice', state.onlineUsers)
+        
+      }
     }
 })
 
@@ -82,6 +89,7 @@ export const  {
   emailToLogin,
   passwordToLogin,
   updateUser,
-  logOut 
+  logOut,
+  setOnlineUsers
 } = authSlice.actions; 
 export default  authSlice.reducer;

@@ -15,7 +15,8 @@ const UserDetails = () => {
         height={250}
         width={250}
         alt={user?.name || "user profile"}
-        className="shadow-sm rounded-md "
+        className="h-auto w-auto shadow-sm rounded-md "
+        priority
           />
     </div>
   )
