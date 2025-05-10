@@ -11,53 +11,29 @@ import { setOnlineUsers } from '../../store/slices/auth/authSlice'
 import { set } from "lodash";
 const page = () => {
     const dispatch = useDispatch();
-    const { user, onlineUsers } = useSelector((state) => state.auth);
+    const { user, onlineUsers , token} = useSelector((state) => state.auth);
     const [socket, setSocket] = useState(null);
-   console.log('user details is : ', user)
+  
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
 
-    const backendUrl = process.env.NEXT_PUBLIC_BACK_END_URL || "http://localhost:5000";
+    const backendUrl = "http://localhost:5000";
 
-
-    
-    /* useEffect(() => {
-    if (!user?.token) return;
-
-    const newSocket = io(process.env.NEXT_PUBLIC_BACK_END_URL , {
-        withCredentials: true,
-        transports: ["websocket"],
-      auth: {
-        authToken: user.token,
-      },
-    });
-
-    newSocket.on("connect", () => {
-      console.log("Socket connected", newSocket.id);
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log("Socket disconnected");
-    });
-
-    setSocket(newSocket);
-
-    return () => {
-      newSocket.disconnect();
-    };
-  }, [user]); */
-    useEffect(() => {
-        if (!user?.token) return;
-            const newSocket = io(process.env.NEXT_PUBLIC_BACK_END_URL, {
+  useEffect(() => {
+ 
+      if (!token) return; 
+            const newSocket = io(backendUrl, {
             withCredentials: true,
             transports: ["websocket"],
             auth: {
-            authToken: user.token,
+            authToken: token,
             },
         });
 
+
         newSocket.on("connect", () => {
-            console.log("Socket connected", newSocket.id);
+            console.log("Socket connected id is: ", newSocket.id);
         });
+    
         newSocket.on("disconnect", () => {
             console.log("Socket disconnected");
         });
@@ -67,13 +43,15 @@ const page = () => {
             dispatch(setOnlineUsers(users));
   });
   setSocket(newSocket);
-
+    console.log('socket is :', socket)
+    
   return () => {
     newSocket.disconnect();
-  };
-}, [user]);
+    };
+    
+}, [token]);
 
-   
+   console.log('onlineusers are; ', onlineUsers)
     return (
         <div className="flex flex-col sm:flex-row h-full">
             <div className="w-full sm:w-1/5 md:w-2/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">

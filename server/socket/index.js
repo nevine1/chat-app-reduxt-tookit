@@ -1,7 +1,7 @@
 
 const http = require("http");
 const { Server } = require("socket.io");
-
+const { getUserDetailsFromToken } = require("../helpers/getUserDetails")
 const socketServer = (app) => {
     const server = http.createServer(app);
     const io = new Server(server, {
@@ -18,6 +18,7 @@ const socketServer = (app) => {
     io.on("connection", async (socket) => {
        console.log("Socket connected:", socket.id);
         const token = socket.handshake.auth.authToken;
+        console.log('auth token in backend is: ', token)
         if (!token) {
             console.log('No authToken provided, disconnecting socket');
             socket.disconnect();
@@ -26,7 +27,7 @@ const socketServer = (app) => {
         try {
             // Assuming you have a function to get user details from the token
             const user = await getUserDetailsFromToken(token);
-            console.log("backend online users are:",token)
+            console.log("backend online users are:", token)
             if (!user) {
                 console.log('Invalid token, disconnecting socket');
                 socket.disconnect();
