@@ -1,6 +1,6 @@
 "use client"
 import { useEffect, useState } from "react";
-//import { useRouter } from "next/navigation";
+
 import SideBar from '../../components/messaging/SideBar'
 import MessageBar  from '../../components/messaging/MessageBar'
 import { useSelector, useDispatch } from 'react-redux'
@@ -21,37 +21,45 @@ const page = () => {
   useEffect(() => {
  
       if (!token) return; 
-            const newSocket = io(backendUrl, {
+
+        const newSocket = io(backendUrl, {
             withCredentials: true,
             transports: ["websocket"],
             auth: {
             authToken: token,
-            },
+                },
+           /*  autoConnect: false,  */
         });
 
+      setSocket(newSocket);
+      
 
         newSocket.on("connect", () => {
             console.log("Socket connected id is: ", newSocket.id);
         });
-    
+      
+        console.log('connected socket is :', socket)
+      
         newSocket.on("disconnect", () => {
             console.log("Socket disconnected");
         });
         //  Listen for online user updates
-        newSocket.on("onlineUser", (users) => {
+        newSocket.on("onlineUsers", (users) => {
             console.log(" Online users received:", users);
             dispatch(setOnlineUsers(users));
-  });
-  setSocket(newSocket);
-    console.log('socket is :', socket)
+        });
+  
+    
     
   return () => {
     newSocket.disconnect();
+    setSocket(null)
     };
     
 }, [token]);
-
-   console.log('onlineusers are; ', onlineUsers)
+    console.log('user found is: ', user)
+   console.log('onlineUsers are; ', onlineUsers);
+    
     return (
         <div className="flex flex-col sm:flex-row h-full">
             <div className="w-full sm:w-1/5 md:w-2/5 h-[calc(100vh-5rem)] bg-slate-100 shadow-md">
@@ -80,7 +88,7 @@ const page = () => {
                     />
                 </div>
             </div>
-
+    
              
         </div>
 

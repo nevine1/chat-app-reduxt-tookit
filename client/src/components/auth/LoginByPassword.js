@@ -50,19 +50,18 @@ const LoginByPassword = () => {
             dispatch(passwordToLogin({
                 email: resp.data.user.email,
                 user: {
+                    _id: resp.data.user._id,
                     name: resp.data.user.name,
                     profile_pic: resp.data.user.profile_pic,
                 },
                 token: resp.data.token,
             }));
-
-            
+           
             dispatch(setToken(resp.data.token));
             console.log(token)
             localStorage.setItem('authToken', resp.data.token);
         }
-
-        //router.push('/dashboard');
+        
         router.replace('/dashboard');
 
     } catch (err) {

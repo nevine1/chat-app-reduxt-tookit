@@ -13,7 +13,7 @@ const socketServer = (app) => {
     });
     
 
-    const onlineUser = new Set();
+    const onlineUsers = new Set();
 
     io.on("connection", async (socket) => {
        console.log("Socket connected:", socket.id);
@@ -25,35 +25,39 @@ const socketServer = (app) => {
             return;
         }
         try {
-            // Assuming you have a function to get user details from the token
+            //  getting user details from the token
             const user = await getUserDetailsFromToken(token);
+            console.log("user connected is:", user)
             console.log("backend online users are:", token)
-            if (!user) {
+
+            if (!user || !user._id ) {
                 console.log('Invalid token, disconnecting socket');
-                socket.disconnect();
-                return;
+                return socket.disconnect();
             }
 
-            socket.join(user._id);
-            onlineUser.add(user._id);
-            io.emit('onlineUser', Array.from(onlineUser));
+            //saving user socket session 
+            socket.userId = user._id; 
+            //join a room 
+            socket.join(user?._id);      
+            onlineUsers.add(user?._id.toString());
+            io.emit('onlineUser', Array.from(onlineUsers));
             
-        } catch (error) {
-            console.error('Error during socket authentication:', error);
-            socket.disconnect();
+            } catch (error) {
+                console.error('Error during socket authentication:', error);
+                socket.disconnect();
         }
+        
         // When a user disconnects
         socket.on('disconnect', () => {
-            if (user?._id) {
-                onlineUser.delete(user._id);
-                console.log(`User disconnected: ${socket.id} (${user._id})`);
+            if (socket.userId) {
+                onlineUsers.delete(socket.userId);
+                console.log(`User disconnected: ${socket.userId}`);
                 // Emit the updated online user list to all connected clients
-                io.emit('onlineUser', Array.from(onlineUser));
-            } else {
-                console.log(`Anonymous user disconnected: ${socket.id}`);
-            }
-        });
+                io.emit('onlineUsers', Array.from(onlineUsers));
+                } 
+             });
     })
+    
     return server;
 }
 

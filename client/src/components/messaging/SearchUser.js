@@ -4,13 +4,15 @@ import LoadingSpinner from './LoadingSpinner';
 import SearchUserCard from './SearchUserCard';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useSelector } from 'react-redux';
 
 let getAllUsers = null;
-const SearchUser = ({onClose }) => {
+const SearchUser = ({ onClose }) => {
+  const { onlineUsers, user } = useSelector(state => state.auth)
   const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-
+const isOnline = onlineUsers.includes(user?._id)
 
   const fetchAllUsers = async () => {
   if (search.trim().length < 3) {
@@ -98,7 +100,9 @@ const SearchUser = ({onClose }) => {
             ))}
         </div>
       </div>
-
+      {
+        isOnline && <p>{user?.name} is <span className="text-red text-[30px]">online</span></p>
+}
       
     </div>
   );

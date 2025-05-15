@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   user: {
+    _id: "",
     name: "", 
     email: "", 
     password: "", 
@@ -29,6 +30,7 @@ const authSlice = createSlice({
           state.user = action.payload; 
           state.successMessage = "User registered successfully";
           state.isLoading = false;
+          
         },
           setSuccessMessage: (state, action) => {
             state.successMessage = action.payload;
@@ -41,20 +43,31 @@ const authSlice = createSlice({
       emailToLogin: (state, action) => {
         console.log("received payload for email login", action.payload);
           if (!action.payload || !action.payload.email) return; 
-              state.user.email = action.payload.email; 
+            state.user.email = action.payload.email; 
+            state.user._id = action.payload._id;
               state.errorMessage = null;
               state.successMessage = "Email is successfully verified.";
            
         }, 
         
         passwordToLogin: (state, action) => {
-          state.user.name = action.payload.user.name;
-          state.user.email = action.payload.email; 
-          state.user.profile_pic = action.payload.user.profile_pic;
-          state.token = action.payload.token; 
-          console.log("Updated Redux state:", JSON.parse(JSON.stringify(state)));
-          console.log(state.token)
-      },
+          console.log("Payload received at passwordToLogin:", action.payload);
+    
+          const { user, token } = action.payload;
+    
+          if (!user || !user._id) return;
+    
+          state.user._id = user._id;
+          state.user.name = user.name;
+          state.user.email = user.email;
+          state.user.profile_pic = user.profile_pic;
+          state.token = token;
+    
+          state.successMessage = "Logged in successfully";
+          state.errorMessage = null;
+    
+          console.log("Updated Redux state after password login:", state.user);
+        },
 
       updateUser: (state, action) => {
         if (!action.payload) {

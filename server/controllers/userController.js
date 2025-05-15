@@ -111,7 +111,7 @@ const loginByPass = async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
 
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Incorrect password" });
+            return res.status(401).json({ message: "Incorrect password", success: false  });
         }
 
         // Generate a new authentication token
@@ -119,9 +119,11 @@ const loginByPass = async (req, res) => {
 
         // Send user data along with the token
         return res.status(200).json({
+            success: true,
             message: "Login successful",
             token: authToken,
             user: {
+                _id: user._id,
                 name: user.name,
                 email: user.email,
                 profile_pic: user.profile_pic
@@ -129,7 +131,7 @@ const loginByPass = async (req, res) => {
         });
     } catch (error) {
         console.error("Login error:", error);
-        return res.status(500).json({ message: "Internal server error" });
+        return res.status(500).json({ message: "Internal server error" , success: false });
     }
 };
 
