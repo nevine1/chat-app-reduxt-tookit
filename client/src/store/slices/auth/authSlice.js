@@ -14,7 +14,8 @@ const initialState = {
         isLoading: false,
         errorMessage: "",
         successMessage: "",  
-        onlineUsers: []
+        onlineUsers: [], 
+        /* socketConnection: null */
   }
 const authSlice = createSlice({
     name: "auth",
@@ -66,7 +67,7 @@ const authSlice = createSlice({
           state.successMessage = "Logged in successfully";
           state.errorMessage = null;
     
-          console.log("Updated Redux state after password login:", state.user);
+          /* console.log("Updated Redux state after password login:", state.user); */
         },
 
       updateUser: (state, action) => {
@@ -76,11 +77,15 @@ const authSlice = createSlice({
           }
           state.user = action.payload;
           console.log("Updated user from Redux:", state.user);
-              },
+      },
+      /* setSocketConnection: (state, action) => {
+        state.socketConnection = action.payload;
+      }, */
       logOut: (state) => {
           
         state.user = { name: "", email: "", password: "", profile_pic: "" };
         state.token = null; 
+        state.socketConnection = null; 
         state.successMessage = "Logged out successfully";
             
       }, 
@@ -88,7 +93,8 @@ const authSlice = createSlice({
         state.onlineUsers = action.payload;
         console.log('this is online users in authSlice', state.onlineUsers)
         
-      }
+      }, 
+     
     }
 })
 
@@ -103,6 +109,7 @@ export const  {
   passwordToLogin,
   updateUser,
   logOut,
-  setOnlineUsers
+  setOnlineUsers, 
+  setSocketConnection
 } = authSlice.actions; 
 export default  authSlice.reducer;
