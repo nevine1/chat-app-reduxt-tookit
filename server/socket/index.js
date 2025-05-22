@@ -1,65 +1,80 @@
-
 const http = require("http");
 const { Server } = require("socket.io");
-const { getUserDetailsFromToken } = require("../helpers/getUserDetails")
+const User = require("../models/UserModel");
+const { getUserDetailsFromToken } = require("../helpers/getUserDetails");
+
 const socketServer = (app) => {
-    const server = http.createServer(app);
-    const io = new Server(server, {
-        cors: {
-            origin: "http://localhost:3000",
-            methods: ["GET", "POST"],
-            credentials: true
-        }
+  const server = http.createServer(app);
+
+  const io = new Server(server, {
+    cors: {
+      origin: "http://localhost:3000",
+      methods: ["GET", "POST"],
+      credentials: true
+    }
+  });
+
+  const onlineUsers = new Set();
+
+  // Middleware for auth before connection
+  io.use(async (socket, next) => {
+    const token = socket.handshake.auth.authToken;
+    if (!token) {
+      return next(new Error("No token provided"));
+    }
+
+    try {
+      const user = await getUserDetailsFromToken(token);
+      if (!user || !user._id) {
+        return next(new Error("Invalid token"));
+      }
+
+      // attach user to socket object
+      socket.user = user;
+      next();
+    } catch (err) {
+      console.error("Error in socket auth middleware:", err);
+      return next(new Error("Auth error"));
+    }
+  });
+
+  io.on("connection", (socket) => {
+    const user = socket.user;
+    const userId = user._id.toString();
+
+    console.log("Socket connected:", socket.id, "for user", userId);
+
+    socket.userId = userId;
+    socket.join(userId);
+    onlineUsers.add(userId);
+
+    io.emit("onlineUser", Array.from(onlineUsers));
+
+    socket.on("message-page", async (targetUserId) => {
+      const userDetails = await User.findById(targetUserId).select("-password");
+      const payload = {
+        _id: userDetails?._id,
+        name: userDetails?.name,
+          email: userDetails?.email,
+        profile_pic: userDetails?.profile_pic,
+        online: onlineUsers.has(targetUserId),
+      };
+      socket.emit("message-user", payload);
     });
-    
 
-    const onlineUsers = new Set();
+    socket.on("disconnect", () => {
+      if (socket.userId) {
+        onlineUsers.delete(socket.userId);
+        io.emit("onlineUsers", Array.from(onlineUsers));
+      }
+    });
 
-    io.on("connection", async (socket) => {
-       console.log("Socket connected:", socket.id);
-        const token = socket.handshake.auth.authToken;
-        console.log('auth token in backend is: ', token)
-        if (!token) {
-            console.log('No authToken provided, disconnecting socket');
-            socket.disconnect();
-            return;
-        }
-        try {
-            //  getting user details from the token
-            const user = await getUserDetailsFromToken(token);
-            console.log("user connected is:", user)
-            console.log("backend online users are:", token)
+    socket.on("connect_error", (err) => {
+      console.error("Socket connection error:", err.message);
+    });
+  });
 
-            if (!user || !user._id ) {
-                console.log('Invalid token, disconnecting socket');
-                return socket.disconnect();
-            }
+  return server;
+};
 
-            //saving user socket session 
-            socket.userId = user._id; 
-            //join a room 
-            socket.join(user?._id);      
-            onlineUsers.add(user?._id.toString());
-            io.emit('onlineUser', Array.from(onlineUsers));
-            
-            } catch (error) {
-                console.error('Error during socket authentication:', error);
-                socket.disconnect();
-        }
-        
-        // When a user disconnects
-        socket.on('disconnect', () => {
-            if (socket.userId) {
-                onlineUsers.delete(socket.userId);
-                console.log(`User disconnected: ${socket.userId}`);
-                // Emit the updated online user list to all connected clients
-                io.emit('onlineUsers', Array.from(onlineUsers));
-                } 
-             });
-    })
-    
-    return server;
-}
-
-
-module.exports = { socketServer};
+module.exports = { socketServer };

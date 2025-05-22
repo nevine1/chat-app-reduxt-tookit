@@ -14,14 +14,14 @@ const page = () => {
   
     const profile_pic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
 
-    const backURL = "http://localhost:5000"
+    const backendUrl = "http://localhost:5000"
 
     useEffect(() => {
         
         if (!token) return;
     
-        const socket = connectSocket(token, backURL);
-    
+        const socket = connectSocket(token, backendUrl);
+        console.log('socket in dashboard page is', socket)
         socket.on("onlineUsers", (users) => {
           console.log("Online users:", users);
           dispatch(setOnlineUsers(users));
