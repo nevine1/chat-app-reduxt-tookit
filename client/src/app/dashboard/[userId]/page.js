@@ -3,7 +3,7 @@ import React from 'react'
 import { useParams } from 'next/navigation';
 import MessageBar from '@/components/messaging/MessageBar';
 import SideBar from '@/components/messaging/SideBar';
-const ChatPage  = () => {
+const page  = () => {
   const { userId } = useParams(); 
   
     
@@ -20,4 +20,4 @@ const ChatPage  = () => {
   );
 };
 
-export default ChatPage 
+export default page;

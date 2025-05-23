@@ -41,10 +41,10 @@ const Navbar = () => {
         <ul className="flex flex-row gap-4">
           {
             token ? (
-            
-              <button type="button" onClick={handleLogout}>Logout</button>
-              
-          
+              <>
+                <Link href="/dashboard" >Dashboard</Link>
+                <button type="button" onClick={handleLogout}>Logout</button>
+            </>
             ) : (
                <>
                   <Link href="/auth/register">Register</Link>

@@ -18,7 +18,7 @@ const socketServer = (app) => {
 
   // Middleware for auth before connection
   io.use(async (socket, next) => {
-    const token = socket.handshake.auth.authToken;
+    const token = socket.handshake.auth.authToken;//auth.token , this is the token coming from the front end
     if (!token) {
       return next(new Error("No token provided"));
     }

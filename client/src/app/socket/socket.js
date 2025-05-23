@@ -1,6 +1,8 @@
 import { io, Socket } from "socket.io-client";
 let socket = null;
+
 export const connectSocket = (token, backendUrl) => {
+ 
   if (!token) {
     console.warn(" No token provided, not connecting socket yet.");
     return null; 
