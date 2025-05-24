@@ -115,7 +115,7 @@ const loginByPass = async (req, res) => {
         }
 
         // Generate a new authentication token
-        const authToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '1h' });
+        const authToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, { expiresIn: '24h' });
 
         // Send user data along with the token
         return res.status(200).json({
