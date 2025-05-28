@@ -6,7 +6,7 @@ import Image from 'next/image'
 import { upperCase } from 'lodash';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
-
+import SendMessage from './SendMessage';
 const MessageBar = ({userId}) => {
   const { token } = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
@@ -45,10 +45,12 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
     }, [token, userId]);
   console.log(" chatting user in message bar is: ", chatUser)
   
+
+  const [click , setClick ] = useState(true)
  return (
-    <div className="w-full bg-white">
+    <div className="w-screen  ">
      
-     <header className="sticky top-0 h-16 bg-white flex flex-row justify-between items-center">
+     <header className="sticky flex-none h-16 bg-white flex items-center justify-between px-4 border-b">
        <div className="m-4 flex flex-row gap-1 items-center">
          <div className="text-red lg:hidden cursor-pointer">
            <FaAngleLeft size={25} />
@@ -85,13 +87,24 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
 
 
      {/* show all messages  */}
-     <section className="h-[calc(100vh-128px)] bg-gray-500 overflow-x-hidden overflow-y-scroll">
+     <section className=" my-4 p-3 bg-white overflow-x-hidden overflow-y-scroll">
+       <div className="flex flex-row gap-3 ">
+         <div>
+           <p>notes: add hight for this section: h-[calc(100vh-16rem)]</p>
+         </div>
+       </div>
        <h1>show all message</h1>
+       <p>lorem100</p>  
      </section>
 
      {/* send new message */}
-     <section className="bg-white h-16 p-3">
-       <h1>Send new message</h1>
+     <section className="bg-white min-w-full  py-2 px-3">
+       {
+         click && (
+           <p className="text-gray-500 text-[15px]">Send message </p>
+         )
+       }
+       <SendMessage click={click} setClick={setClick} />
      </section>
     </div>
   );

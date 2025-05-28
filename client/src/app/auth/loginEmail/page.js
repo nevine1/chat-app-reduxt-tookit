@@ -9,7 +9,7 @@ const page = () => {
     
   return (
     <div>
-      <h1>login by email </h1>
+      
       <LoginByEmail/>
     </div>
   )

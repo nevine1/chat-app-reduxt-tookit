@@ -100,9 +100,9 @@ const isOnline = onlineUsers.includes(user?._id)
             ))}
         </div>
       </div>
-      {
+      {/* {
         isOnline && <p>{user?.name} is <span className="text-red text-[30px]">online</span></p>
-}
+      } */}
       
     </div>
   );
