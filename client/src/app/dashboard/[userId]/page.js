@@ -13,7 +13,7 @@ const page  = () => {
      <div className="w-full sm:w-1/5 md:w-2/5  bg-slate-100 shadow-md">
         <SideBar />
       </div>
-      <div className="w-full sm:w-4/5 md:3/5 shadow-md m-2 rounded-sm /* h-[calc(100vh-5rem)] */">
+      <div className="w-full sm:w-4/5 md:3/5 shadow-md m-2 rounded-sm  h-[calc(100vh-5rem)] ">
         <MessageBar userId={userId} />
       </div>
     </div>

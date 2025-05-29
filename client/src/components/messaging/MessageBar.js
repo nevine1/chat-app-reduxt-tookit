@@ -48,7 +48,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
 
   const [click , setClick ] = useState(true)
  return (
-    <div className="w-screen  ">
+    <div className="w-full ">
      
      <header className="sticky flex-none h-16 bg-white flex items-center justify-between px-4 border-b">
        <div className="m-4 flex flex-row gap-1 items-center">
@@ -98,7 +98,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
      </section>
 
      {/* send new message */}
-     <section className="bg-white min-w-full  py-2 px-3">
+     <section className="bg-white py-2 px-3 pr-4">
        {
          click && (
            <p className="text-gray-500 text-[15px]">Send message </p>
