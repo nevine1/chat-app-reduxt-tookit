@@ -7,6 +7,7 @@ import { upperCase } from 'lodash';
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import { FaAngleLeft } from "react-icons/fa6";
 import SendMessage from './SendMessage';
+
 const MessageBar = ({userId}) => {
   const { token } = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
@@ -46,7 +47,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
   console.log(" chatting user in message bar is: ", chatUser)
   
 
-  const [click , setClick ] = useState(true)
+ 
  return (
     <div className="w-full ">
      
@@ -86,25 +87,13 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
      </header>
 
 
-     {/* show all messages  */}
-     <section className=" my-4 p-3 bg-white overflow-x-hidden overflow-y-scroll">
-       <div className="flex flex-row gap-3 ">
-         <div>
-           <p>notes: add hight for this section: h-[calc(100vh-16rem)]</p>
-         </div>
-       </div>
-       <h1>show all message</h1>
-       <p>lorem100</p>  
-     </section>
+     {/* all messages  */}
+     
 
-     {/* send new message */}
-     <section className="bg-white py-2 px-3 pr-4">
-       {
-         click && (
-           <p className="text-gray-500 text-[15px]">Send message </p>
-         )
-       }
-       <SendMessage click={click} setClick={setClick} />
+    
+     <section className=" ">
+       
+       <SendMessage  />
      </section>
     </div>
   );
