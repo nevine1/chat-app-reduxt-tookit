@@ -8,9 +8,8 @@ import Image from 'next/image'
 import { IoMdCloseCircle } from "react-icons/io";
 
 const SendMessage = () => {
-    const [click , setClick ] = useState(true)
     const [showMediaOptions, setShowMediaOptions] = useState(false);
-    
+    const [loading, setLoading ] = useState(false)
     const [message, setMessage ] = useState({
       text: "", 
       imageUrl: "", 
@@ -32,14 +31,17 @@ const SendMessage = () => {
     setPreviewUrl(url);
     
     setMessage((prev) => ({ ...prev, imageUrl: url }));
-    
+
+    setShowMediaOptions(false)
     return () => URL.revokeObjectURL(url);
   }, [file]);
   
   //  Handle image file selection
   const handleUploadImage = (e) => {
+    setLoading(true)
     const selectedFile = e.target.files?.[0] || null;
     setFile(selectedFile); 
+    setLoading(false)
   };
   
   // Clear uploaded image
@@ -56,10 +58,9 @@ const SendMessage = () => {
   
     const url = URL.createObjectURL(videoFile);
     setPreviewVideoUrl(url);
-  
-  
-    setMessage((prev) => ({ ...prev, videoUrlUrl: url }));
-  
+    setMessage((prev) => ({ ...prev, videoUrlUrl: url }))
+
+    setShowMediaOptions(false)
  
     return () => URL.revokeObjectURL(url);
   }, [videoFile]);
@@ -75,7 +76,10 @@ const SendMessage = () => {
     setMessage((prev) => ({ ...prev, videoUrlUrl: '' }));
   };
    
-
+    /* sending message */
+  const handleSendingMessages = () => {
+    console.log('helloooooooooo')
+  }
   return (
     
     <div >
@@ -91,11 +95,11 @@ const SendMessage = () => {
               />
             </div>
             <Image
-              src={previewUrl}
+              src={message.imageUrl}
               width={150}
               height={150}
               alt="send image"
-              className="rounded-md bg-white w-40 h-40 m-4 p-4"
+              className=" aspect-square w-full h-full rounded-md bg-white  m-4 p-4"
             />
           </div>
         )}
@@ -107,15 +111,15 @@ const SendMessage = () => {
           <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
             <div className="absolute top-1 cursor-pointer text-blue-500">
               <IoMdCloseCircle size={22}
-                onClick={clearUploadImage}
+                onClick={clearUploadVideo}
               />
             </div>
             <video
               src={previewVideoUrl}
-              width={150}
-              height={150}
-           
-              className="rounded-md bg-white w-40 h-40 m-4 p-4"
+              className="aspect-square w-full object-scale-down h-full max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
+              controls
+              autoPlay
+              muted
             />
           </div>
         )}
@@ -126,16 +130,11 @@ const SendMessage = () => {
 
 
       {/* send new message */}
-      <section className="bg-white py-2 px-3 pr-4">
-       {
-         click && (
-           <p className="text-gray-500 text-[15px]">Send message </p>
-         )
-        }
+    <section className="bg-white py-2 px-3 pr-4">
         
     <div className="flex flex-row sm:flex-row gap-2 w-full mt-3 ">
       
-      {/* Plus Button with Dropdown */}
+      {/* Plus Button with Dropdown for sending images and videos */}
       <div className="relative">
         <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
           <FaPlus
@@ -144,9 +143,8 @@ const SendMessage = () => {
               hover:bg-white duration-200 transition-all cursor-pointer"
           />
         </button>
-
-        {/* Dropdown icons above the plus */}
-              {showMediaOptions && (
+            
+            {showMediaOptions && (
                   
           <div className="absolute bottom-full mb-2 left-1/2 -translate-x-5% flex flex-col gap-1 bg-slate-200 p-2 shadow rounded z-10">
             <label htmlFor="uploadImage" className="flex items-center gap-2 cursor-pointer transition-all duration-200 hover:bg-white p-2 pl-3 rounded-sm">
@@ -173,17 +171,19 @@ const SendMessage = () => {
         )}
       </div>
 
-      {/* Input Field */}
+      {/* messages input field*/}
       <div className="flex-auto">
         <input
-          type="text"
-          className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
+              type="text"
+              value={message.text}
+              placeholder='Type your message'
+            className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
           border-blue-500 focus:border-blue-500 outline-none"
-          onChange={() => setClick(false)}
+          onChange={handleSendingMessages}
         />
       </div>
 
-      {/* Send Button */}
+      {/* Sending message Button */}
       <div className="flex items-center">
         <button>
           <IoSend size={18} className="text-blue-500" />
