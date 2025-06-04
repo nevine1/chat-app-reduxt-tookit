@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const Message = require("./MessageModel")
 const conversationSchema = new mongoose.Schema({
     sender: {
         type: mongoose.Schema.ObjectId,
@@ -13,7 +13,7 @@ const conversationSchema = new mongoose.Schema({
     }, 
     messages: [
         {
-            type: mongoose.Schema.objectId,
+            type: mongoose.Schema.ObjectId,
             ref: Message,
         }
     ]

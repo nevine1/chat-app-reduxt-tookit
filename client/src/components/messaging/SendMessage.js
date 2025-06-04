@@ -6,8 +6,14 @@ import { IoSend } from "react-icons/io5";
 import { FaVideo } from "react-icons/fa";
 import Image from 'next/image'
 import { IoMdCloseCircle } from "react-icons/io";
-
-const SendMessage = () => {
+import { connectSocket, disconnectSocket } from '../../app/socket/socket'
+import { useSelector } from 'react-redux'
+import { io, Socket } from "socket.io-client";
+import moment from 'moment';
+const SendMessage = ({ userId , allMessages}) => {
+    const [socket, setSocket] = useState(null);
+    const backendUrl = "http://localhost:5000"
+    const { user, token } = useSelector((state) => state.auth)
     const [showMediaOptions, setShowMediaOptions] = useState(false);
     const [loading, setLoading ] = useState(false)
     const [message, setMessage ] = useState({
@@ -20,6 +26,8 @@ const SendMessage = () => {
   const [videoFile, setVideoFile ] = useState(null)
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewVideoUrl, setPreviewVideoUrl] = useState(null)
+  const [receivedMsg, setReceivedMsg] = useState("");
+  
   
   useEffect(() => {
     if (!file) {
@@ -76,31 +84,97 @@ const SendMessage = () => {
     setMessage((prev) => ({ ...prev, videoUrlUrl: '' }));
   };
    
-    /* sending message */
-  const handleSendingMessages = () => {
-    console.log('helloooooooooo')
+  /* sending message */
+  
+  useEffect(() => {
+    if (!token) return;
+
+    const newSocket = io(backendUrl, {
+      transports: ["websocket"],
+      withCredentials: true,
+      auth: { authToken: token },
+    });
+
+    setSocket(newSocket);
+
+    newSocket.on("connect", () => {
+      console.log(" Connected:", newSocket.id)
+    });
+
+    newSocket.on("disconnect", () => {
+      console.log(" Disconnected");
+    });
+
+    // Listen for messages
+    newSocket.on("receive message", (data) => {
+      console.log("The new message is :", data);
+      setReceivedMsg(data.text || "Media message received");
+    });
+
+    return () => {
+      newSocket.disconnect();
+      setSocket(null);
+    };
+  }, [token]);
+
+  const handleTextMessage = (e) => {
+    const textMsg = e.target.value; 
+    setMessage((prev) => ({
+      ...prev, 
+      text: textMsg
+    }))
+    
   }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (message.text || message.imageUrl || message.videoUrl) {
+      if (socket) {
+        socket.emit('new message', {
+
+          sender: user?._id, 
+          receiver: userId,
+          text: message.text,
+          imageUrl: message.imageUrl,
+          videoUrl: message.videoUrl,
+          msgByUserId: user?._id,
+
+        })
+
+        setMessage({ text: "", imageUrl: "", videoUrl: "" });
+        setFile(null);
+        setVideoFile(null);
+        setPreviewUrl("");
+        setPreviewVideoUrl("");
+      }
+    }
+    
+  }
+
   return (
     
     <div >
-      {/* show all messages  */}
+     
       <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
         
         {/* { upload image file } */}
-       {previewUrl && (
+       {message.imageUrl && (
           <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
             <div className="absolute top-1 cursor-pointer text-blue-500">
               <IoMdCloseCircle size={22}
                 onClick={clearUploadImage}
               />
             </div>
-            <Image
-              src={message.imageUrl}
-              width={150}
-              height={150}
-              alt="send image"
-              className=" aspect-square w-full h-full rounded-md bg-white  m-4 p-4"
-            />
+
+              <Image
+                /* src={previewUrl}  use this previewUrl for src  or message.imageUrl */
+                src={message.imageUrl}
+                width={150}
+                height={150}
+                alt="send image"
+                className=" aspect-square w-full h-full rounded-md bg-white  m-4 p-4"
+              />
           </div>
         )}
           
@@ -123,7 +197,19 @@ const SendMessage = () => {
             />
           </div>
         )}
-       <h1>Show messsages</h1>
+
+        {/* all messages */}
+        <div>
+          {
+            allMessages.map((msg, index) => (
+              <div key={index} className="flex flex-col gap-2 bg-white py-1 px-3 m-2 rounded-sm shadow-sm"> 
+                <h1>{msg.text}</h1>
+                <p className="text-gray-500 text-xs ml-auto w-fit">{moment(msg.cratedAt).format("hh:mm dd")}</p>
+              </div>
+            ))
+          }
+        </div>
+       
      
       </section>
       
@@ -171,24 +257,26 @@ const SendMessage = () => {
         )}
       </div>
 
-      {/* messages input field*/}
-      <div className="flex-auto">
-        <input
-              type="text"
-              value={message.text}
-              placeholder='Type your message'
-            className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
-          border-blue-500 focus:border-blue-500 outline-none"
-          onChange={handleSendingMessages}
-        />
-      </div>
-
-      {/* Sending message Button */}
-      <div className="flex items-center">
-        <button>
-          <IoSend size={18} className="text-blue-500" />
-        </button>
-      </div>
+          {/* messages input field*/}
+      <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
+        <div className="flex-auto">
+          <input
+                type="text"
+                value={message.text}
+                placeholder='Type your message'
+              className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
+            border-blue-500 focus:border-blue-500 outline-none"
+            onChange={handleTextMessage}
+          />
+        </div>
+        
+        <div className="flex items-center">
+          <button type="submit">
+            <IoSend size={18} className="text-blue-500" />
+          </button>
+        </div>
+      </form>
+     
       </div>
       
       </section>

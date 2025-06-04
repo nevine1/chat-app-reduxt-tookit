@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const messageSchema = new mongoose.Schema({
     text: {
-        type: string,
+        type: String,
         default: ""
     }, 
     imageUrl: {
@@ -14,9 +14,14 @@ const messageSchema = new mongoose.Schema({
         default: ""
     }, 
     seen: {
-        type: boolean,
+        type: Boolean,
         default: false
-    }
+    }, 
+    msgByUserId: {
+        type: mongoose.Schema.ObjectId,
+        required: true, 
+        ref: "User",
+     }
 }, {
     timestamps: true
 })

@@ -12,8 +12,10 @@ const MessageBar = ({userId}) => {
   const { token } = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
   const dispatch = useDispatch();
+  const [allMessages, setAllMessages ] = useState([])
 console.log('messages user id is: ', userId)
-  const backendUrl = "http://localhost:5000"
+  const backendUrl = "http://localhost:5000";
+  
 const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : "/assets/flower.jpg"
     useEffect(() => {
         
@@ -28,12 +30,19 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
       
       console.log('connected socket in message page is:', socket)
       
-       if (socket) {
-        socket.emit("message-page", userId); //  This is the ID being sent
-        socket.on("message-user", (data) => {
+      if (socket) {
+         
+          socket.emit("message-page", userId); //  This is the ID being sent
+          socket.on("message-user", (data) => {
           console.log("user details coming from socket server are:", data);
           setChatUser(data)
-        });
+          });
+        
+        //to see the sent and received messages 
+        socket.on('message', (data) => {
+          console.log('message data is:', data)
+          setAllMessages(data)
+        })
          
         console.log("user id in message page is, ", userId);
       }
@@ -44,10 +53,9 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
         };
 
     }, [token, userId]);
-  console.log(" chatting user in message bar is: ", chatUser)
   
 
- 
+ console.log('here is all messages for this conversation', allMessages)
  return (
     <div className="w-full ">
      
@@ -93,7 +101,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
     
      <section className=" ">
        
-       <SendMessage  />
+       <SendMessage userId={userId} allMessages={allMessages} />
      </section>
     </div>
   );

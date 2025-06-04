@@ -1,6 +1,8 @@
 const http = require("http");
 const { Server } = require("socket.io");
 const User = require("../models/UserModel");
+const Conversation = require("../models/ConversationModel");
+const Message = require("../models/MessageModel");
 const { getUserDetailsFromToken } = require("../helpers/getUserDetails");
 
 const socketServer = (app) => {
@@ -61,6 +63,61 @@ const socketServer = (app) => {
       };
       socket.emit("message-user", payload);
     });
+    
+    //send new message 
+    socket.on('new message', async(data) => {
+      //check conversation availability for both users
+      const conversation = await Conversation.findOne({
+        "$or": [
+          {
+          sender: data?.sender, 
+          receiver: data?.receiver
+        }, {
+          sender: data?.receiver, 
+          receiver: data?.sender
+          }
+        ]
+      })
+
+      if (!conversation) {
+        const createConversation = await Conversation({
+          sender: data?.sender,
+          receiver: data?.receiver
+        })
+
+        conversation = createConversation.save();
+      }
+
+        const message = new Message({
+          text: data.text,
+          imageUrl: data.imageUrl,
+          videoUrl: data.videoUrl,
+          msgByUserId : data.msgByUserId 
+        })
+
+      const saveMessage = await message.save();
+      
+        const updateConversation = await Conversation.updateOne(
+          { _id: conversation?._id }, 
+          {
+            "$push": { messages: saveMessage?._id }
+          })
+      
+          const getConversationMessage = await Conversation.findOne({
+            "$or": [
+                { sender: data?.sender, receiver: data?.receiver }, 
+                { sender: data?.receiver, receiver: data?.sender }
+              ]
+            }).populate('messages').sort({ updatedAt : -1})
+    
+      console.log('conversation is the ', getConversationMessage)
+      
+      //sending the message to specific user(const user = await getUserDetailsFromToken(token), 
+      // use this defined user in that line) , use it as a sender and also add th receiver user
+      io.to(data?.sender).emit('message', getConversationMessage.messages)//.message, means return only the message from the getConversationMessage
+      io.to(data?.receiver).emit('message', getConversationMessage.messages)
+      
+    }) //ending of socket.on for message
 
     socket.on("disconnect", () => {
       if (socket.userId) {
@@ -72,6 +129,7 @@ const socketServer = (app) => {
     socket.on("connect_error", (err) => {
       console.error("Socket connection error:", err.message);
     });
+
   });
 
   return server;
