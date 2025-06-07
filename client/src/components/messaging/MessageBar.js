@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import {connectSocket, disconnectSocket } from "../../app/socket/socket"
 import { setOnlineUsers } from '@/store/slices/auth/authSlice';
@@ -12,7 +12,8 @@ const MessageBar = ({userId}) => {
   const { token } = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
   const dispatch = useDispatch();
-  const [allMessages, setAllMessages ] = useState([])
+  const [allMessages, setAllMessages] = useState([])
+  const currentMsg = useRef(null)
 console.log('messages user id is: ', userId)
   const backendUrl = "http://localhost:5000";
   
@@ -55,7 +56,13 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
     }, [token, userId]);
   
 
- console.log('here is all messages for this conversation', allMessages)
+  console.log('here is all messages for this conversation', allMessages)
+  
+  useEffect(() => {
+    if (currentMsg.current) {
+      currentMsg.current.scrollIntoView({behavior: "smooth"})
+    }
+  }, [allMessages])
  return (
     <div className="w-full ">
      
@@ -101,7 +108,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
     
      <section className=" ">
        
-       <SendMessage userId={userId} allMessages={allMessages} />
+       <SendMessage userId={userId} allMessages={allMessages} currentMsg={currentMsg}  />
      </section>
     </div>
   );

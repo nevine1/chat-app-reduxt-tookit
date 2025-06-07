@@ -1,284 +1,214 @@
 "use client";
-import { useState, useEffect } from 'react'
-import { FaPlus } from "react-icons/fa";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import { io } from "socket.io-client";
+import { FaPlus, FaVideo } from "react-icons/fa";
 import { AiFillPicture } from "react-icons/ai";
-import { IoSend } from "react-icons/io5";
-import { FaVideo } from "react-icons/fa";
-import Image from 'next/image'
 import { IoMdCloseCircle } from "react-icons/io";
-import { connectSocket, disconnectSocket } from '../../app/socket/socket'
-import { useSelector } from 'react-redux'
-import { io, Socket } from "socket.io-client";
-import moment from 'moment';
-const SendMessage = ({ userId , allMessages}) => {
-    const [socket, setSocket] = useState(null);
-    const backendUrl = "http://localhost:5000"
-    const { user, token } = useSelector((state) => state.auth)
-    const [showMediaOptions, setShowMediaOptions] = useState(false);
-    const [loading, setLoading ] = useState(false)
-    const [message, setMessage ] = useState({
-      text: "", 
-      imageUrl: "", 
-      videoUrl:""
-  })
+import { IoSend } from "react-icons/io5";
+import Image from "next/image";
+import moment from "moment";
 
-  const [file, setFile] = useState(null);
-  const [videoFile, setVideoFile ] = useState(null)
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [previewVideoUrl, setPreviewVideoUrl] = useState(null)
-  const [receivedMsg, setReceivedMsg] = useState("");
-  
-  
+const SendMessage = ({ userId, allMessages }) => {
+  const backendUrl = "http://localhost:5000";
+  const { user, token } = useSelector((state) => state.auth);
+
+  const [socket, setSocket] = useState(null);
+  const [showMediaOptions, setShowMediaOptions] = useState(false);
+  const [message, setMessage] = useState({ text: "", imageUrl: "", videoUrl: "" });
+  const [imageFile, setImageFile] = useState(null);
+  const [videoFile, setVideoFile] = useState(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState("");
+  const [previewVideoUrl, setPreviewVideoUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const messagesEndRef = useRef(null);
+
+  // Scroll to bottom on new messages
   useEffect(() => {
-    if (!file) {
-      setPreviewUrl('');
-      return;
-    }
-  
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
-    
-    setMessage((prev) => ({ ...prev, imageUrl: url }));
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [allMessages]);
 
-    setShowMediaOptions(false)
-    return () => URL.revokeObjectURL(url);
-  }, [file]);
-  
-  //  Handle image file selection
-  const handleUploadImage = (e) => {
-    setLoading(true)
-    const selectedFile = e.target.files?.[0] || null;
-    setFile(selectedFile); 
-    setLoading(false)
-  };
-  
-  // Clear uploaded image
-  const clearUploadImage = () => {
-    setFile(null); 
-    setMessage((prev) => ({ ...prev, imageUrl: '' }));
-  };
-
-  useEffect(() => {
-    if (!videoFile) {
-      setPreviewVideoUrl('');
-      return;
-    }
-  
-    const url = URL.createObjectURL(videoFile);
-    setPreviewVideoUrl(url);
-    setMessage((prev) => ({ ...prev, videoUrlUrl: url }))
-
-    setShowMediaOptions(false)
- 
-    return () => URL.revokeObjectURL(url);
-  }, [videoFile]);
- 
-  const handleUploadVideo = (e) => {
-    const selectedVideoFile = e.target.files?.[0] || null;
-    setVideoFile(selectedVideoFile); 
-  };
-  
- 
-  const clearUploadVideo = () => {
-    setVideoFile(null); 
-    setMessage((prev) => ({ ...prev, videoUrlUrl: '' }));
-  };
-   
-  /* sending message */
-  
+  // Socket.IO connection
   useEffect(() => {
     if (!token) return;
-
     const newSocket = io(backendUrl, {
       transports: ["websocket"],
       withCredentials: true,
       auth: { authToken: token },
     });
-
     setSocket(newSocket);
-
-    newSocket.on("connect", () => {
-      console.log(" Connected:", newSocket.id)
-    });
-
-    newSocket.on("disconnect", () => {
-      console.log(" Disconnected");
-    });
-
-    // Listen for messages
-    newSocket.on("receive message", (data) => {
-      console.log("The new message is :", data);
-      setReceivedMsg(data.text || "Media message received");
-    });
-
-    return () => {
-      newSocket.disconnect();
-      setSocket(null);
-    };
+    newSocket.on("connect", () => console.log("Socket connected"));
+    newSocket.on("disconnect", () => console.log("Socket disconnected"));
+    return () => newSocket.disconnect();
   }, [token]);
 
-  const handleTextMessage = (e) => {
-    const textMsg = e.target.value; 
-    setMessage((prev) => ({
-      ...prev, 
-      text: textMsg
-    }))
-    
-  }
+  const handleTextChange = (e) => {
+    setMessage((prev) => ({ ...prev, text: e.target.value }));
+  };
+
+  const uploadFile = async (file) => {
+    setLoading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch(`${backendUrl}/api/upload`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+      const data = await res.json();
+      setLoading(false);
+      return data.fileUrl;
+    } catch (err) {
+      console.error("Upload failed:", err);
+      setLoading(false);
+      return null;
+    }
+  };
+
+  const handleUploadImage = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    setPreviewImageUrl(localUrl);
+    setImageFile(file);
+    setVideoFile(null);
+    setPreviewVideoUrl("");
+    const uploadedUrl = await uploadFile(file);
+    if (uploadedUrl) {
+      setMessage((prev) => ({ ...prev, imageUrl: uploadedUrl, videoUrl: "" }));
+    }
+  };
+
+  const handleUploadVideo = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const localUrl = URL.createObjectURL(file);
+    setPreviewVideoUrl(localUrl);
+    setVideoFile(file);
+    setImageFile(null);
+    setPreviewImageUrl("");
+    const uploadedUrl = await uploadFile(file);
+    if (uploadedUrl) {
+      setMessage((prev) => ({ ...prev, videoUrl: uploadedUrl, imageUrl: "" }));
+    }
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
-    if (message.text || message.imageUrl || message.videoUrl) {
-      if (socket) {
-        socket.emit('new message', {
+    if (!socket || (!message.text && !message.imageUrl && !message.videoUrl)) return;
 
-          sender: user?._id, 
-          receiver: userId,
-          text: message.text,
-          imageUrl: message.imageUrl,
-          videoUrl: message.videoUrl,
-          msgByUserId: user?._id,
+    const newMessage = {
+      sender: user._id,
+      receiver: userId,
+      text: message.text,
+      imageUrl: message.imageUrl,
+      videoUrl: message.videoUrl,
+      msgByUserId: user._id,
+      createdAt: new Date().toISOString(),
+    };
 
-        })
-
-        setMessage({ text: "", imageUrl: "", videoUrl: "" });
-        setFile(null);
-        setVideoFile(null);
-        setPreviewUrl("");
-        setPreviewVideoUrl("");
-      }
-    }
-    
-  }
+    socket.emit("new message", newMessage);
+    setMessage({ text: "", imageUrl: "", videoUrl: "" });
+    setImageFile(null);
+    setVideoFile(null);
+    setPreviewImageUrl("");
+    setPreviewVideoUrl("");
+  };
 
   return (
-    
-    <div >
-     
-      <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
-        
-        {/* { upload image file } */}
-       {message.imageUrl && (
-          <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
-            <div className="absolute top-1 cursor-pointer text-blue-500">
-              <IoMdCloseCircle size={22}
-                onClick={clearUploadImage}
-              />
-            </div>
-
-              <Image
-                /* src={previewUrl}  use this previewUrl for src  or message.imageUrl */
-                src={message.imageUrl}
-                width={150}
-                height={150}
-                alt="send image"
-                className=" aspect-square w-full h-full rounded-md bg-white  m-4 p-4"
-              />
+    <div>
+      {/* Messages */}
+      <section className="p-4 h-[calc(100vh-17rem)] overflow-y-scroll bg-slate-300">
+        {previewImageUrl && (
+          <div className="relative w-fit mx-auto mb-4">
+            <IoMdCloseCircle
+              size={22}
+              className="absolute top-1 right-1 text-blue-500 cursor-pointer"
+              onClick={() => {
+                setPreviewImageUrl("");
+                setMessage((prev) => ({ ...prev, imageUrl: "" }));
+              }}
+            />
+            <Image src={previewImageUrl} alt="Preview" width={150} height={150} className="rounded" />
           </div>
         )}
-          
-        
-        {/* upload video file */}
 
         {previewVideoUrl && (
-          <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
-            <div className="absolute top-1 cursor-pointer text-blue-500">
-              <IoMdCloseCircle size={22}
-                onClick={clearUploadVideo}
-              />
-            </div>
-            <video
-              src={previewVideoUrl}
-              className="aspect-square w-full object-scale-down h-full max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
-              controls
-              autoPlay
-              muted
+          <div className="relative w-fit mx-auto mb-4">
+            <IoMdCloseCircle
+              size={22}
+              className="absolute top-1 right-1 text-blue-500 cursor-pointer"
+              onClick={() => {
+                setPreviewVideoUrl("");
+                setMessage((prev) => ({ ...prev, videoUrl: "" }));
+              }}
             />
+            <video src={previewVideoUrl} controls className="rounded w-64" />
           </div>
         )}
 
-        {/* all messages */}
-        <div>
-          {
-            allMessages.map((msg, index) => (
-              <div key={index} className="flex flex-col gap-2 bg-white py-1 px-3 m-2 rounded-sm shadow-sm"> 
-                <h1>{msg.text}</h1>
-                <p className="text-gray-500 text-xs ml-auto w-fit">{moment(msg.cratedAt).format("hh:mm dd")}</p>
-              </div>
-            ))
-          }
-        </div>
-       
-     
+        {allMessages.map((msg, index) => (
+          <div
+            key={index}
+            className={`max-w-xs p-3 m-2 rounded-lg ${
+              user._id === msg.msgByUserId ? "bg-blue-400 text-white self-end ml-auto" : "bg-gray-200 text-black self-start"
+            }`}
+          >
+            {msg.imageUrl && (
+              <Image src={msg.imageUrl} alt="Sent" width={150} height={150} className="rounded mb-2" />
+            )}
+            {msg.videoUrl && (
+              <video src={msg.videoUrl} controls className="rounded w-64 mb-2" />
+            )}
+            {msg.text && <p>{msg.text}</p>}
+            <p className="text-xs mt-1">{moment(msg.createdAt).format("hh:mm A")}</p>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </section>
-      
 
-
-      {/* send new message */}
-    <section className="bg-white py-2 px-3 pr-4">
-        
-    <div className="flex flex-row sm:flex-row gap-2 w-full mt-3 ">
-      
-      {/* Plus Button with Dropdown for sending images and videos */}
-      <div className="relative">
-        <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
-          <FaPlus
-            className="bg-blue-500 text-white rounded-full p-1 w-6 h-6
-              hover:text-blue-500 border hover:border-blue-500
-              hover:bg-white duration-200 transition-all cursor-pointer"
-          />
-        </button>
-            
+      {/* Send Message */}
+      <section className="bg-white p-3">
+        <form onSubmit={handleSubmit} className="flex items-center gap-2">
+          {/* Media Options */}
+          <div className="relative">
+            <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
+              <FaPlus className="bg-blue-500 text-white rounded-full p-1 w-6 h-6 hover:bg-white hover:text-blue-500 border transition" />
+            </button>
             {showMediaOptions && (
-                  
-          <div className="absolute bottom-full mb-2 left-1/2 -translate-x-5% flex flex-col gap-1 bg-slate-200 p-2 shadow rounded z-10">
-            <label htmlFor="uploadImage" className="flex items-center gap-2 cursor-pointer transition-all duration-200 hover:bg-white p-2 pl-3 rounded-sm">
-              <AiFillPicture className="bg-blue-500 text-white rounded-full p-1 w-6 h-6  border  " />
-              <p className="text-[14px]">Image</p>
-            </label>
-            <label htmlFor="uploadVideo" className="flex items-center gap-2  rounded-sm cursor-pointer p-2 pl-3  transition-all duration-200 hover:bg-white ">
-              <FaVideo className="bg-blue-500 text-white rounded-full p-2 w-7 h-7  border hover:border-blue-500 " />
-              <p className="text-[14px]">Video</p>
+              <div className="absolute left-0 bottom-8 flex flex-col gap-2 bg-slate-200 p-2 rounded shadow z-10">
+                <label htmlFor="uploadImage" className="flex items-center gap-2 cursor-pointer">
+                  <AiFillPicture className="text-blue-500" />
+                  Image
                 </label>
-                
-             <input type="file"
-                 id="uploadImage"   
-                  onChange={handleUploadImage} 
-                 className="hidden" 
-                />
-                
-             <input type="file"
-                id="uploadVideo"   
-                  onChange={handleUploadVideo} 
-                 className="hidden" 
-                />         
+                <label htmlFor="uploadVideo" className="flex items-center gap-2 cursor-pointer">
+                  <FaVideo className="text-blue-500" />
+                  Video
+                </label>
+                <input id="uploadImage" type="file" accept="image/*" className="hidden" onChange={handleUploadImage} />
+                <input id="uploadVideo" type="file" accept="video/*" className="hidden" onChange={handleUploadVideo} />
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-          {/* messages input field*/}
-      <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
-        <div className="flex-auto">
+          {/* Text Input */}
           <input
-                type="text"
-                value={message.text}
-                placeholder='Type your message'
-              className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
-            border-blue-500 focus:border-blue-500 outline-none"
-            onChange={handleTextMessage}
+            type="text"
+            value={message.text}
+            onChange={handleTextChange}
+            placeholder="Type a message"
+            className="flex-grow border border-blue-400 rounded-full px-3 py-1 text-sm"
           />
-        </div>
-        
-        <div className="flex items-center">
-          <button type="submit">
-            <IoSend size={18} className="text-blue-500" />
+
+          {/* Send Button */}
+          <button type="submit" disabled={loading}>
+            <IoSend size={20} className="text-blue-500" />
           </button>
-        </div>
-      </form>
-     
-      </div>
-      
+        </form>
       </section>
     </div>
   );

@@ -6,7 +6,8 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const connectDB = require('./config/connectDB');
 const routerOfUsers = require('./routers/userRouter');
-
+const uploadRoutes = require("./routers/upload")
+const path = require('path');
 
 
 // Middleware
@@ -22,6 +23,12 @@ app.use(cors({
 // API Routes
 app.use("/api/users", routerOfUsers);
 
+//uploads files (images, videos,....) route
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+// Register upload route
+app.use('/api', uploadRoutes); // /api/upload is now available
+
 app.get("/", (req, res) => {
     res.json({ message: `Server is running very well at port: ${port}` });
     console.log(req.url);
@@ -34,7 +41,7 @@ let port = DEFAULT_PORT;
 connectDB().then(() => {
     
     server.listen(port, () => {
-        console.log(`✅ Server is running on port: ${port}`);
+        console.log(`Server is running on port: ${port}`);
     });
 
     server.on("error", (err) => {
