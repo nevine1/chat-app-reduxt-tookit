@@ -90,8 +90,8 @@ const socketServer = (app) => {
 
         const message = new Message({
           text: data.text,
-          imageUrl: data.imageUrl,
-          videoUrl: data.videoUrl,
+          imageUrls: data.imageUrls,
+          videoUrls: data.videoUrls,
           msgByUserId : data.msgByUserId 
         })
 
