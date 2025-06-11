@@ -94,15 +94,13 @@ const socketServer = (app) => {
           videoUrls: data.videoUrls,
           msgByUserId : data.msgByUserId 
         })
-
-      const saveMessage = await message.save();
       
+      const saveMessage = await message.save();
         const updateConversation = await Conversation.updateOne(
           { _id: conversation?._id }, 
           {
             "$push": { messages: saveMessage?._id }
           })
-      
           const getConversationMessage = await Conversation.findOne({
             "$or": [
                 { sender: data?.sender, receiver: data?.receiver }, 
@@ -111,7 +109,6 @@ const socketServer = (app) => {
             }).populate('messages').sort({ updatedAt : -1})
     
       console.log('conversation is the ', getConversationMessage)
-      
       //sending the message to specific user(const user = await getUserDetailsFromToken(token), 
       // use this defined user in that line) , use it as a sender and also add th receiver user
       io.to(data?.sender).emit('message', getConversationMessage.messages)//.message, means return only the message from the getConversationMessage

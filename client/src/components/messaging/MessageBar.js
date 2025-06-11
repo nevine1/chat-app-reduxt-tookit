@@ -14,16 +14,14 @@ const MessageBar = ({userId}) => {
   const dispatch = useDispatch();
   const [allMessages, setAllMessages] = useState([])
   const currentMsg = useRef(null)
-console.log('messages user id is: ', userId)
   const backendUrl = "http://localhost:5000";
   
 const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : "/assets/flower.jpg"
-    useEffect(() => {
-        
+  
+  useEffect(() => {
+      
         if (!token) return;
-    
         const socket = connectSocket(token, backendUrl);
-    
         socket.on("onlineUsers", (users) => {
           console.log("Online users:", users);
           dispatch(setOnlineUsers(users));
@@ -47,7 +45,6 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
          
         console.log("user id in message page is, ", userId);
       }
-      
     
         return () => {
           disconnectSocket();
@@ -60,9 +57,10 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
   
   useEffect(() => {
     if (currentMsg.current) {
-      currentMsg.current.scrollIntoView({behavior: "smooth"})
+      currentMsg.current.scrollIntoView({ behavior: "smooth" })
     }
-  }, [allMessages])
+  }, [allMessages]);
+
  return (
     <div className="w-full ">
      

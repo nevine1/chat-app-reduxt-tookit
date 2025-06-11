@@ -119,11 +119,12 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
             console.log("New message received:", data);
          
         });
+
         return () => {
             newSocket.disconnect();
             setSocket(null);
         };
-    }, [token, backendUrl]); 
+    }, [token, backendUrl]); // Added backendUrl to dependency array
 
     const handleTextMessage = (e) => {
         const textMsg = e.target.value;
@@ -133,49 +134,61 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
         }));
     };
 
-    const handleSubmit = async (e) => {
+    const handleSubmit = async (e) => { 
         e.preventDefault();
-        if (
-          loading || 
-          (!message.text.trim() && message.imageUrls.length === 0 && message.videoUrls.length === 0)
-        ) return;
-      
-        if (!userId || !user?._id || !socket) return;
-      
-        const msgToSend = {
-          sender: user._id,
-          receiver: userId,
-          text: message.text,
-          imageUrls: message.imageUrls,
-          videoUrls: message.videoUrls,
-          msgByUserId: user._id,
-          createdAt: new Date().toISOString(),
-        };
-      
-        try {
-          setLoading(true);
-          socket.emit("new message", msgToSend);
-          console.log("Sent:", msgToSend);
-      
-          setMessage({ text: "", imageUrls: [], videoUrls: [] });
-          setImageFile(null);
-          setVideoFile(null);
-          setPreviewImageUrl([]);
-          setPreviewVideoUrl([]);
-        } catch (err) {
-          console.error(" Failed to send message", err);
-        } finally {
-          setLoading(false);
+
+        if (!message.text || !message.imageUrls || !message.videoUrls) return 
+
+        if (message.text || message.imageUrls  || message.videoUrls) {
+            if (socket) {
+                const msgToSend = {
+                    sender: user?._id,
+                    receiver: userId,
+                    text: message.text,
+                    imageUrls: message.imageUrls,
+                    videoUrls: message.videoUrls, 
+                    msgByUserId: user?._id,
+                    createdAt: new Date().toISOString() 
+                };
+
+                socket.emit('new message', msgToSend);
+
+          
+                setMessage({ text: "", imageUrl: [], videoUrl: [] });
+                setImageFile(null);
+                setVideoFile(null);
+                setPreviewImageUrl([]);
+                setPreviewVideoUrl([]);
+            }
         }
-      };
-      
+    };
 
 
     return (
         <div>
             <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
 
-              
+                {/* { upload image file PREVIEW} */}
+                {/* {previewImageUrl.length > 0 && (
+                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
+                        {previewImageUrl.map((url, index) => (
+                        <div key={index} className="relative">
+                            <IoMdCloseCircle
+                            size={20}
+                            onClick={() => handleRemoveImage(url)}
+                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
+                            />
+                            <Image
+                            src={url}
+                            width={150}
+                            height={150}
+                            alt={`preview-${index}`}
+                            className="aspect-square w-32 h-32 object-cover rounded"
+                            />
+                        </div>
+                        ))}
+                    </div>
+                    )} */}
 
 
                 {/* upload video file PREVIEW */}
@@ -200,6 +213,22 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                         ))}
                     </div>
                     )}
+               {/*  {previewVideoUrl && ( // Use previewVideoUrl for local display
+                    <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
+                        <div className="absolute top-1 cursor-pointer text-blue-500">
+                            <IoMdCloseCircle size={22}
+                                onClick={clearUploadVideo}
+                            />
+                        </div>
+                        <video
+                            src={previewVideoUrl} // Use previewVideoUrl for src here
+                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
+                            controls
+                            autoPlay
+                            muted
+                        />
+                    </div>
+                )} */}
 
                 {/* all messages */}
                 <div className="flex flex-col" ref={messagesEndRef} > {/* Use messagesEndRef here */}
@@ -258,47 +287,6 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                 <div className="flex flex-row sm:flex-row gap-2 w-full mt-3 ">
 
                     {/* Plus Button with Dropdown for sending images and videos */}
-                    {/* <div className="relative">
-                        <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
-                            <FaPlus
-                                className="bg-blue-500 text-white rounded-full p-1 w-6 h-6
-                                hover:text-blue-500 border hover:border-blue-500
-                                hover:bg-white duration-200 transition-all cursor-pointer"
-                            />
-                        </button>
-
-                        {showMediaOptions && (
-
-                            <div className="absolute bottom-full mb-2 left-1/2 -translate-x-5% flex flex-col gap-1 bg-slate-200 p-2 shadow rounded z-10">
-                                <label htmlFor="uploadImage" className="flex items-center gap-2 cursor-pointer transition-all duration-200 hover:bg-white p-2 pl-3 rounded-sm">
-                                    <AiFillPicture className="bg-blue-500 text-white rounded-full p-1 w-6 h-6  border  " />
-                                    <p className="text-[14px]">Image</p>
-                                </label>
-                                <label htmlFor="uploadVideo" className="flex items-center gap-2  rounded-sm cursor-pointer p-2 pl-3  transition-all duration-200 hover:bg-white ">
-                                    <FaVideo className="bg-blue-500 text-white rounded-full p-2 w-7 h-7  border hover:border-blue-500 " />
-                                    <p className="text-[14px]">Video</p>
-                                </label>
-
-                                <input type="file"
-                                    id="uploadImage"
-                                    onChange={handleUploadImage}
-                                    className="hidden"
-                                    accept="image/*" // Specify accepted file types
-                                />
-
-                                <input type="file"
-                                    id="uploadVideo"
-                                    onChange={handleUploadVideo}
-                                    className="hidden"
-                                    accept="video/*" // Specify accepted file types
-                                />
-                            </div>
-                        )}
-                    </div> */}
-
-                    {/* messages input field*/}
-                    <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
-
                     <div className="relative">
                         <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
                             <FaPlus
@@ -335,28 +323,11 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                 />
                             </div>
                         )}
-                        </div>
-                        
-                    {previewImageUrl.length > 0 && (
-                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
-                        {previewImageUrl.map((url, index) => (
-                        <div key={index} className="relative">
-                            <IoMdCloseCircle
-                            size={20}
-                            onClick={() => handleRemoveImage(url)}
-                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
-                            />
-                            <Image
-                            src={url}
-                            width={150}
-                            height={150}
-                            alt={`preview-${index}`}
-                            className="aspect-square w-32 h-32 object-cover rounded"
-                            />
-                        </div>
-                        ))}
                     </div>
-                    )}
+
+                    {/* messages input field*/}
+                    <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
+
                         <div className="flex-auto">
 
                             <input
