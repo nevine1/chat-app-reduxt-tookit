@@ -67,7 +67,8 @@ const socketServer = (app) => {
     //send new message 
     socket.on('new message', async(data) => {
       //check conversation availability for both users
-      const conversation = await Conversation.findOne({
+      console.log("Received new message:", data)
+      let conversation = await Conversation.findOne({
         "$or": [
           {
           sender: data?.sender, 
@@ -87,7 +88,7 @@ const socketServer = (app) => {
 
         conversation = createConversation.save();
       }
-
+      console.log(conversation);
         const message = new Message({
           text: data.text,
           imageUrls: data.imageUrls,

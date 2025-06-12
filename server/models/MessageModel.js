@@ -5,16 +5,16 @@ const messageSchema = new mongoose.Schema({
         type: String,
         default: ""
     }, 
-    imageUrl: {
-        type: String, 
+    imageUrls: {
+        type: [String], 
         default: ""
     }, 
-    videoUrl: {
-        type: String, 
+    videoUrls: {
+        type: [String], 
         default: ""
     }, 
     seen: {
-        type: Boolean,
+        type: Boolean, 
         default: false
     }, 
     msgByUserId: {

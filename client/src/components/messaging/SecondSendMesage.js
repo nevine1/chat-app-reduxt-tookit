@@ -58,7 +58,9 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
               ...prev, 
               imageUrls: [...prev.imageUrls, uploadedUrl]
          }));
-      }
+        }
+        //to hide add image and video option after selecting the image or video
+        setShowMediaOptions(!showMediaOptions)
     };
     // Clear uploaded image
     const handleRemoveImage = (urlToRemove) => {
@@ -80,12 +82,15 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
       setVideoFile(file);
     
       setLoading(true);
-      const uploadedUrl = await uploadFile(file, token);
+        const uploadedUrl = await uploadFile(file, token);
+        console.log('uploading iamge url is:', uploadedUrl)
       setLoading(false);
     
       if (uploadedUrl) {
         setMessage((prev) => ({ ...prev, videoUrls: [...prev.videoUrls, uploadedUrl] }));
-      }
+        }
+        
+        setShowMediaOptions(!showMediaOptions)
     };
     
 
@@ -119,14 +124,13 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
             console.log("New message received:", data);
          
         });
-
         return () => {
             newSocket.disconnect();
             setSocket(null);
         };
-    }, [token, backendUrl]); // Added backendUrl to dependency array
+    }, [token, backendUrl]); 
 
-    const handleTextMessage = (e) => {
+    const handleTextMessage = async (e) => {
         const textMsg = e.target.value;
         setMessage((prev) => ({
             ...prev,
@@ -134,116 +138,70 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
         }));
     };
 
-    const handleSubmit = async (e) => { 
+    const handleSubmit = async (e) => {
         e.preventDefault();
+        if (
+          loading || 
+          (!message.text.trim() && message.imageUrls.length === 0 && message.videoUrls.length === 0)
+        ) return;
+      
+        //if (!userId || !user?._id || !socket) return;
+       
+        
 
-        if (!message.text || !message.imageUrls || !message.videoUrls) return 
-
-        if (message.text || message.imageUrls  || message.videoUrls) {
-            if (socket) {
-                const msgToSend = {
-                    sender: user?._id,
-                    receiver: userId,
-                    text: message.text,
-                    imageUrls: message.imageUrls,
-                    videoUrls: message.videoUrls, 
-                    msgByUserId: user?._id,
-                    createdAt: new Date().toISOString() 
-                };
-
-                socket.emit('new message', msgToSend);
-
-          
-                setMessage({ text: "", imageUrl: [], videoUrl: [] });
-                setImageFile(null);
-                setVideoFile(null);
-                setPreviewImageUrl([]);
-                setPreviewVideoUrl([]);
-            }
+        try {
+            setLoading(true);
+            const msgToSend = {
+                sender: user._id,
+                receiver: userId,
+                text: message.text,
+                imageUrls: [...message.imageUrls],  
+                videoUrls: [...message.videoUrls],
+                msgByUserId: user._id,
+                createdAt: new Date().toISOString(),
+            };
+            console.log("new message to send: ", msgToSend)
+          socket.emit("new message", msgToSend);
+          console.log("Sent:", msgToSend);
+      
+          setMessage({ text: "", imageUrls: [], videoUrls: [] });
+          setImageFile(null);
+          setVideoFile(null);
+          setPreviewImageUrl([]);
+          setPreviewVideoUrl([]);
+        } catch (err) {
+          console.error(" Failed to send message", err);
+        } finally {
+          setLoading(false);
         }
-    };
+      };
+      
 
+    // to see all messages when load the page; 
+    useEffect(() => {
+        if (user?._id) {
+            setMessage(message)
+        }
+    }, [])
 
     return (
         <div>
             <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
 
-                {/* { upload image file PREVIEW} */}
-                {/* {previewImageUrl.length > 0 && (
-                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
-                        {previewImageUrl.map((url, index) => (
-                        <div key={index} className="relative">
-                            <IoMdCloseCircle
-                            size={20}
-                            onClick={() => handleRemoveImage(url)}
-                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
-                            />
-                            <Image
-                            src={url}
-                            width={150}
-                            height={150}
-                            alt={`preview-${index}`}
-                            className="aspect-square w-32 h-32 object-cover rounded"
-                            />
-                        </div>
-                        ))}
-                    </div>
-                    )} */}
-
-
-                {/* upload video file PREVIEW */}
-                {previewVideoUrl.length > 0 && (
-                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
-                        {previewVideoUrl.map((url, index) => (
-                        <div key={index} className="relative">
-                            <IoMdCloseCircle
-                            size={20}
-                            onClick={() => clearUploadVideo(index)}
-                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
-                            />
-                            
-                           <video
-                            src={previewVideoUrl} // Use previewVideoUrl for src here
-                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
-                            controls
-                            autoPlay
-                            muted
-                        />
-                        </div>
-                        ))}
-                    </div>
-                    )}
-               {/*  {previewVideoUrl && ( // Use previewVideoUrl for local display
-                    <div className="flex flex-col justify-center gap-3 items-center bg-pink-50 relative">
-                        <div className="absolute top-1 cursor-pointer text-blue-500">
-                            <IoMdCloseCircle size={22}
-                                onClick={clearUploadVideo}
-                            />
-                        </div>
-                        <video
-                            src={previewVideoUrl} // Use previewVideoUrl for src here
-                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
-                            controls
-                            autoPlay
-                            muted
-                        />
-                    </div>
-                )} */}
-
                 {/* all messages */}
-                <div className="flex flex-col" ref={messagesEndRef} > {/* Use messagesEndRef here */}
+                <div className="flex flex-col" /* ref={messagesEndRef} */ > 
                     {
                         allMessages.map((msg, index) => (
                             <div
                                 key={index}
                                 // The currentMsg ref should be handled by the parent component or within this component's useEffect for scrolling
-                                // ref={index === allMessages.length - 1 ? currentMsg : null} // This ref is passed as a prop, better to manage scrolling internally
+                                 ref={index === allMessages.length - 1 ? currentMsg : null} // This ref is passed as a prop, better to manage scrolling internally
                                 className={`flex flex-col max-w-fit py-1 px-4 m-2 rounded-lg shadow-sm
                                 ${user?._id === msg.msgByUserId
                                         ? ' bg-blue-400  text-right self-end rounded-tr-none'
                                         : 'bg-gray-200 text-left self-start rounded-tl-none'
                                     }`}
-                            >
+                                    >
                                 <div className="object-scale-down max-w-full md:max-w-[300px]">
                                     {
                                         msg?.imageUrl && ( 
@@ -284,9 +242,10 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
             {/* send new message */}
             <section className="bg-white py-2 px-3 pr-4">
 
-                <div className="flex flex-row sm:flex-row gap-2 w-full mt-3 ">
+            <div className="flex flex-row sm:flex-row gap-2 w-full mt-3 ">
+                  
+                 <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
 
-                    {/* Plus Button with Dropdown for sending images and videos */}
                     <div className="relative">
                         <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
                             <FaPlus
@@ -323,34 +282,75 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                 />
                             </div>
                         )}
-                    </div>
-
-                    {/* messages input field*/}
-                    <form className="flex flex-row gap-2 w-full" onSubmit={handleSubmit}>
-
-                        <div className="flex-auto">
-
-                            <input
-                                type="text"
-                                value={message.text}
-                                placeholder='Type your message'
-                                className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
-                                border-blue-500 focus:border-blue-500 outline-none"
-                                onChange={handleTextMessage}
+                        </div>
+                        
+                    {previewImageUrl.length > 0 && (
+                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
+                        {previewImageUrl.map((url, index) => (
+                        <div key={index} className="relative">
+                            <IoMdCloseCircle
+                            size={20}
+                            onClick={() => handleRemoveImage(url)}
+                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
+                            />
+                            <Image
+                            src={url}
+                            width={60}
+                            height={60}
+                            alt={`preview-${index}`}
+                            className="aspect-square w-16 h-16 object-cover rounded"
                             />
                         </div>
-
-                        <div className="flex items-center">
-                            <button type="submit" disabled={loading}> {/* Disable button during upload */}
-                                <IoSend size={18} className="text-blue-500" />
-                            </button>
+                        ))}
                         </div>
-                    </form>
+                            
+                    )}
+                        
+                        {previewVideoUrl.length > 0 && (
+                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
+                       
+                     {previewVideoUrl.map((url, index) => (
+                        <div key={index} className="relative">
+                            <IoMdCloseCircle
+                            size={20}
+                            onClick={() => clearUploadVideo(index)}
+                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
+                            />
+                            
+                           <video
+                            src={previewVideoUrl} // Use previewVideoUrl for src here
+                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
+                            controls
+                            autoPlay
+                            muted
+                        />
+                        </div>
+                        ))}
+                    </div>
+                    )}
+                    <div className="flex-auto">
 
-                </div>
+                        <input
+                            type="text"
+                            value={message.text}
+                            placeholder='Type your message'
+                            className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
+                            border-blue-500 focus:border-blue-500 outline-none"
+                            onChange={handleTextMessage}
+                            />
+                    </div>
 
-            </section>
-        </div>
+                    <div className="flex items-center">
+                        <button type="submit" disabled={loading}> {/* Disable button during upload */}
+                            <IoSend size={18} className="text-blue-500" />
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+
+        </section>
+    </div>
     );
 };
 
