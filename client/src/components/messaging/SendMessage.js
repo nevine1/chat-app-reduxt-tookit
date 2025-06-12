@@ -58,7 +58,9 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
               ...prev, 
               imageUrls: [...prev.imageUrls, uploadedUrl]
          }));
-      }
+        }
+        //to hide add image and video option after selecting the image or video
+        setShowMediaOptions(!showMediaOptions)
     };
     // Clear uploaded image
     const handleRemoveImage = (urlToRemove) => {
@@ -85,7 +87,9 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
     
       if (uploadedUrl) {
         setMessage((prev) => ({ ...prev, videoUrls: [...prev.videoUrls, uploadedUrl] }));
-      }
+        }
+        
+        setShowMediaOptions(!showMediaOptions)
     };
     
 
@@ -151,7 +155,6 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
           msgByUserId: user._id,
           createdAt: new Date().toISOString(),
         };
-      
         try {
           setLoading(true);
           socket.emit("new message", msgToSend);
@@ -170,36 +173,16 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
       };
       
 
+    // to see all messages when load the page; 
+    useEffect(() => {
+        if (user?._id) {
+            setMessage(message)
+        }
+    }, [])
 
     return (
         <div>
             <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
-
-              
-
-
-                {/* upload video file PREVIEW */}
-                {previewVideoUrl.length > 0 && (
-                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
-                        {previewVideoUrl.map((url, index) => (
-                        <div key={index} className="relative">
-                            <IoMdCloseCircle
-                            size={20}
-                            onClick={() => clearUploadVideo(index)}
-                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
-                            />
-                            
-                           <video
-                            src={previewVideoUrl} // Use previewVideoUrl for src here
-                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
-                            controls
-                            autoPlay
-                            muted
-                        />
-                        </div>
-                        ))}
-                    </div>
-                    )}
 
                 {/* all messages */}
                 <div className="flex flex-col" ref={messagesEndRef} > {/* Use messagesEndRef here */}
@@ -208,13 +191,13 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                             <div
                                 key={index}
                                 // The currentMsg ref should be handled by the parent component or within this component's useEffect for scrolling
-                                // ref={index === allMessages.length - 1 ? currentMsg : null} // This ref is passed as a prop, better to manage scrolling internally
+                                 ref={index === allMessages.length - 1 ? currentMsg : null} // This ref is passed as a prop, better to manage scrolling internally
                                 className={`flex flex-col max-w-fit py-1 px-4 m-2 rounded-lg shadow-sm
                                 ${user?._id === msg.msgByUserId
                                         ? ' bg-blue-400  text-right self-end rounded-tr-none'
                                         : 'bg-gray-200 text-left self-start rounded-tl-none'
                                     }`}
-                            >
+                                    >
                                 <div className="object-scale-down max-w-full md:max-w-[300px]">
                                     {
                                         msg?.imageUrl && ( 
@@ -348,38 +331,60 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                             />
                             <Image
                             src={url}
-                            width={150}
-                            height={150}
+                            width={60}
+                            height={60}
                             alt={`preview-${index}`}
-                            className="aspect-square w-32 h-32 object-cover rounded"
+                            className="aspect-square w-16 h-16 object-cover rounded"
                             />
                         </div>
                         ))}
                     </div>
-                    )}
-                        <div className="flex-auto">
-
-                            <input
-                                type="text"
-                                value={message.text}
-                                placeholder='Type your message'
-                                className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
-                                border-blue-500 focus:border-blue-500 outline-none"
-                                onChange={handleTextMessage}
+                        )}
+                        
+                        {previewVideoUrl.length > 0 && (
+                    <div className="flex flex-wrap gap-4 justify-start items-center p-2 bg-pink-50 relative">
+                        {previewVideoUrl.map((url, index) => (
+                        <div key={index} className="relative">
+                            <IoMdCloseCircle
+                            size={20}
+                            onClick={() => clearUploadVideo(index)}
+                            className="absolute top-0 right-0 cursor-pointer text-blue-500 z-10"
                             />
+                            
+                           <video
+                            src={previewVideoUrl} // Use previewVideoUrl for src here
+                            className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
+                            controls
+                            autoPlay
+                            muted
+                        />
                         </div>
+                        ))}
+                    </div>
+                    )}
+                    <div className="flex-auto">
 
-                        <div className="flex items-center">
-                            <button type="submit" disabled={loading}> {/* Disable button during upload */}
-                                <IoSend size={18} className="text-blue-500" />
-                            </button>
-                        </div>
-                    </form>
+                        <input
+                            type="text"
+                            value={message.text}
+                            placeholder='Type your message'
+                            className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
+                            border-blue-500 focus:border-blue-500 outline-none"
+                            onChange={handleTextMessage}
+                            />
+                    </div>
 
-                </div>
+                    <div className="flex items-center">
+                        <button type="submit" disabled={loading}> {/* Disable button during upload */}
+                            <IoSend size={18} className="text-blue-500" />
+                        </button>
+                    </div>
+                </form>
 
-            </section>
-        </div>
+            </div>
+
+        </section>
+    </div>
     );
 };
 
