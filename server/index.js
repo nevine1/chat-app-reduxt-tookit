@@ -23,11 +23,12 @@ app.use(cors({
 // API Routes
 app.use("/api/users", routerOfUsers);
 
-//uploads files (images, videos,....) route
+//uploads files (images, videos,....) 
+// Serve static files from /uploads folder
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Register upload route
-app.use('/api', uploadRoutes); // /api/upload is now available
+// Use your router
+app.use('/api', uploadRoutes); 
 
 app.get("/", (req, res) => {
     res.json({ message: `Server is running very well at port: ${port}` });

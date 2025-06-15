@@ -1,24 +1,20 @@
-const backendUrl = "http://localhost:5000";
+const uploadFile = async (file, token) => {
+  const formData = new FormData();
+  formData.append("file", file); 
 
- const uploadFile = async (file, token) => {
-    
-    const formData = new FormData();
-    formData.append("file", file);
-    try {
-      const res = await fetch(`${backendUrl}/api/upload`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        body: formData,
-      });
-      const data = await res.json();
-     
-      return data.fileUrl;
-    } catch (err) {
-      console.error("Upload failed:", err);
-      return null;
-    }
+  const res = await fetch("http://localhost:5000/api/uploads", { 
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const data = await res.json();
+ 
+
+  const uploadedUrl = `http://localhost:5000${data.filePath}`; 
+  return uploadedUrl;
 };
-  
+
 export default uploadFile;

@@ -9,6 +9,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { useSelector } from 'react-redux';
 import { io } from "socket.io-client";
 import moment from 'moment';
+import Link from 'next/link';
 import { setIsLoading } from '@/store/slices/auth/authSlice';
 import uploadFile from '@/uploads/upload';
 const SendMessage = ({ userId, allMessages, currentMsg }) => {
@@ -26,10 +27,9 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
 
     const [imageFile, setImageFile] = useState(null);
     const [videoFile, setVideoFile] = useState(null);
-    /* const [previewImageUrl, setPreviewImageUrl] = useState([]); 
-    const [previewVideoUrl, setPreviewVideoUrl] = useState([]); */
     const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
     const [uploadedVideoUrls, setUploadedVideoUrls] = useState([]);
+
     // Ref for scrolling to the latest message
     const messagesEndRef = useRef(null);
 
@@ -48,17 +48,6 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
         const localUrl = URL.createObjectURL(file);
         setUploadedImageUrls((prev) => [...prev, localUrl]);
         setImageFile(file);
-      
-        setLoading(true);
-      
-        const uploadedUrl = await uploadFile(file, token);
-        console.log("Uploaded image URL:", uploadedUrl);
-      
-        if (uploadedUrl) {
-            setUploadedImageUrls((prev) => [...prev, uploadedUrl]);
-        }
-      
-        setLoading(false);
         setShowMediaOptions(!showMediaOptions);
     };
       
@@ -83,13 +72,10 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
     
         setLoading(true);
         const uploadedUrl = await uploadFile(file, token);
-        console.log('uploading iamge url is:', uploadedUrl)
+        console.log('uploading image url is:', uploadedUrl)
         setLoading(false);
     
-        /* if (uploadedUrl) {
-          setMessage((prev) => ({ ...prev, videoUrls: [...prev.videoUrls, uploadedUrl] }));
-          } */
-        
+      
         setShowMediaOptions(!showMediaOptions)
     };
     
@@ -103,23 +89,18 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
         // Socket.IO connection and event handling
         useEffect(() => {
             if (!token) return;
-
             const newSocket = io(backendUrl, {
                 transports: ["websocket"],
                 withCredentials: true,
                 auth: { authToken: token },
             });
-
             setSocket(newSocket);
-
             newSocket.on("connect", () => {
-                console.log("Connected to Socket.IO:", newSocket.id);
+                //console.log("Connected to Socket.IO:", newSocket.id);
             });
-
             newSocket.on("disconnect", () => {
                 console.log("Disconnected from Socket.IO");
             });
-
             newSocket.on("receive message", (data) => {
                 console.log("New message received:", data);
          
@@ -142,113 +123,118 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
             e.preventDefault();
             if (loading) return;
             if (!userId || !user?._id || !socket) return;
-      
+        
             const hasText = message.text.trim().length > 0;
             const hasImage = !!imageFile;
             const hasVideo = !!videoFile;
-      
+        
             if (!hasText && !hasImage && !hasVideo) return;
-      
+        
             setLoading(true);
             try {
-                const uploadedImages = [];
-                const uploadedVideos = [];
+                let uploadedImages = [];
+                let uploadedVideos = [];
+        
                 if (hasImage) {
                     const uploadedImageUrl = await uploadFile(imageFile, token);
-                    if (uploadedImageUrl) uploadedImages.push(uploadedImageUrl);
+                    if (uploadedImageUrl) {
+                        uploadedImages.push(uploadedImageUrl);
+                    }
                 }
+        
                 if (hasVideo) {
                     const uploadedVideoUrl = await uploadFile(videoFile, token);
                     if (uploadedVideoUrl) uploadedVideos.push(uploadedVideoUrl);
                 }
-      
+        
                 const msgToSend = {
                     sender: user._id,
                     receiver: userId,
                     text: message.text.trim(),
-                    imageUrls: uploadedImageUrls,  //  Use stored uploaded URLs
-                    videoUrls: uploadedVideoUrls,
+                    imageUrls: uploadedImages,
+                    videoUrls: uploadedVideos,
                     msgByUserId: user._id,
                     createdAt: new Date().toISOString(),
                 };
-                console.log(" new message to send:", msgToSend);
-      
+        
+                console.log("📦 message to send:", msgToSend);
+        
                 socket.emit("new message", msgToSend);
+                console.log('here is the final url for the sent image:', uploadedImageUrls)
+                
+                // Reset form
                 setMessage({ text: "", imageUrls: [], videoUrls: [] });
                 setImageFile(null);
                 setVideoFile(null);
-                /* setPreviewImageUrl([]);
-                setPreviewVideoUrl([]); */
                 setUploadedImageUrls([]);
                 setUploadedVideoUrls([]);
+        
             } catch (err) {
-                console.error("Failed to send message", err);
+                console.error(" Failed to send message", err);
             } finally {
                 setLoading(false);
             }
         };
-      
-      
-
-        // to see all messages when load the page; 
-        useEffect(() => {
-            if (user?._id) {
-                setMessage(message)
-            }
-        }, [])
+        
+          
 
         return (
             <div>
                 <section className=" my-3 mx-2 p-3 bg-slate-300 h-[calc(100vh-17rem)] overflow-x-hidden overflow-y-scroll">
 
                     {/* all messages */}
-                    <div className="flex flex-col" /* ref={messagesEndRef} */ >
+                    <div className="flex flex-col">
                         {
                             allMessages.map((msg, index) => (
-                                <div
-                                    key={index}
-                                    // The currentMsg ref should be handled by the parent component or within this component's useEffect for scrolling
-                                    ref={index === allMessages.length - 1 ? currentMsg : null} // This ref is passed as a prop, better to manage scrolling internally
-                                    className={`flex flex-col max-w-fit py-1 px-4 m-2 rounded-lg shadow-sm
-                                ${user?._id === msg.msgByUserId
-                                            ? ' bg-blue-400  text-right self-end rounded-tr-none'
-                                            : 'bg-gray-200 text-left self-start rounded-tl-none'
-                                        }`}
-                                >
-                                    <p>Image URL: {message.imageUrls?.[0]}</p>
-                                    <div className="object-scale-down max-w-full md:max-w-[300px]">
-                                    {message.imageUrls && message.imageUrls.length > 0 && (
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                            {message.imageUrls.map((url, index) => (
+                            <div
+                                key={index}
+                                ref={index === allMessages.length - 1 ? currentMsg : null}
+                                className={`flex flex-col max-w-fit py-1 px-4 m-2 rounded-lg shadow-sm
+                                ${user?._id === msg.sender
+                                    ? ' bg-blue-400 text-right self-end rounded-tr-none'
+                                    : 'bg-gray-200 text-left self-start rounded-tl-none'
+                                }`}
+                            >
+                                {/*  after mapping messages and getting the imageUrls, then map imageUrl to show the uploaded images */}
+                                {msg.imageUrls && Array.isArray(msg.imageUrls) && msg.imageUrls.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                    {msg.imageUrls.map((url, index) => (
+                                    <div key={index}>
+                                        <Link href={url}>
                                             <img
-                                                key={index}
-                                                src={url}
-                                                alt="Uploaded"
-                                                className="w-48 h-48 object-cover rounded-lg border"
-                                            />
-                                            ))}
-                                        </div>
-                                        )}
-                                                                                {
-                                            msg?.videoUrl && (
-                                                <video
-                                                    src={msg?.videoUrl}
-                                                    className="aspect-square w-full object-scale-down h-full max-w-sm rounded-lg bg-white mt-8 m-4 p-4"
-                                                    controls
-                                                />
-                                            )
-                                        }
+                                            src={url}
+                                            alt={`Uploaded image ${index}`}
+                                            className="w-48 h-48 object-cover rounded-lg border cursor-pointer"
+                                            />     
+                                        </Link>
                                     </div>
-                                    {msg.text && <p className="text-white">{msg.text}</p>}
-
-
-                                    <p className="text-white text-xs mt-1">
-                                        {moment(msg.createdAt).format("hh:mm A")}
-                                    </p>
+                                    ))}
                                 </div>
+                                )}
+                                
+                                {msg.videoUrls && Array.isArray(msg.videoUrls) && msg.videoUrls.length > 0 && (
+                                <div className="mt-2">
+                                    {msg.videoUrls.map((video, idx) => (
+                                    <video
+                                        key={idx}
+                                        src={video}
+                                        controls
+                                        className="aspect-video w-full max-w-sm rounded-lg bg-white"
+                                    />
+                                    ))}
+                                </div>
+                                )}
+                                
+                                {msg.text && <p className="text-white">{msg.text}</p>}
+
+                                <p className="text-white text-xs mt-1">
+                                {moment(msg.createdAt).format("hh:mm A")}
+                                </p>
+                            </div>
                             ))
                         }
-                    </div>
+                        </div>
+
 
 
                 </section>
@@ -286,14 +272,14 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                             id="uploadImage"
                                             onChange={handleUploadImage}
                                             className="hidden"
-                                            accept="image/*" // Specify accepted file types
+                                            accept="image/*" 
                                         />
 
                                         <input type="file"
                                             id="uploadVideo"
                                             onChange={handleUploadVideo}
                                             className="hidden"
-                                            accept="video/*" // Specify accepted file types
+                                            accept="video/*" 
                                         />
                                     </div>
                                 )}
@@ -333,7 +319,7 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                             />
                             
                                             <video
-                                                src={previewVideoUrl} // Use previewVideoUrl for src here
+                                                src={previewVideoUrl} 
                                                 className="aspect-square sticky bottom-0 w-[40%] object-scale-down h-[40%] max-w-sm rounded-lg bg-white mt-8  m-4 p-4"
                                                 controls
                                                 autoPlay
@@ -350,13 +336,13 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                     value={message.text}
                                     placeholder='Type your message'
                                     className="bg-slate-200 rounded-full w-full border py-1 px-2 text-[15px] text-gray-500
-                            border-blue-500 focus:border-blue-500 outline-none"
+                                     border-blue-500 focus:border-blue-500 outline-none"
                                     onChange={handleTextMessage}
                                 />
                             </div>
 
                             <div className="flex items-center">
-                                <button type="submit" disabled={loading}> {/* Disable button during upload */}
+                                <button type="submit" disabled={loading}> 
                                     <IoSend size={18} className="text-blue-500" />
                                 </button>
                             </div>

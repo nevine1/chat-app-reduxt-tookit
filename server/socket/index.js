@@ -65,57 +65,87 @@ const socketServer = (app) => {
     });
     
     //send new message 
-    socket.on('new message', async(data) => {
-      //check conversation availability for both users
-      console.log("Received new message:", data)
+    socket.on('new message', async (data) => {
+      // Check conversation availability for both users
+      console.log("Received new message:", data);
+  
       let conversation = await Conversation.findOne({
-        "$or": [
-          {
-          sender: data?.sender, 
-          receiver: data?.receiver
-        }, {
-          sender: data?.receiver, 
-          receiver: data?.sender
-          }
-        ]
-      })
-
+          "$or": [
+              { sender: data?.sender, receiver: data?.receiver },
+              { sender: data?.receiver, receiver: data?.sender }
+          ]
+      });
+  
       if (!conversation) {
-        const createConversation = await Conversation({
-          sender: data?.sender,
-          receiver: data?.receiver
-        })
-
-        conversation = createConversation.save();
+          // FIX 1: Ensure 'new' keyword is used for Mongoose model instantiation
+          // and AWAIT the save operation to get the saved document.
+          const createConversation = new Conversation({ // Use 'new'
+              sender: data?.sender,
+              receiver: data?.receiver
+          });
+          conversation = await createConversation.save(); // AWAIT this save!
+          console.log("New conversation created:", conversation);
+      } else {
+          console.log("Existing conversation found:", conversation);
       }
-      console.log(conversation);
-        const message = new Message({
+  
+      const message = new Message({
           text: data.text,
-          imageUrls: data.imageUrls,
+          imageUrls: data.imageUrls, // This expects imageUrls to be an array of URLs from the frontend
           videoUrls: data.videoUrls,
-          msgByUserId : data.msgByUserId 
-        })
-      
+          msgByUserId: data.msgByUserId
+      });
+  
       const saveMessage = await message.save();
-        const updateConversation = await Conversation.updateOne(
-          { _id: conversation?._id }, 
-          {
-            "$push": { messages: saveMessage?._id }
-          })
-          const getConversationMessage = await Conversation.findOne({
-            "$or": [
-                { sender: data?.sender, receiver: data?.receiver }, 
-                { sender: data?.receiver, receiver: data?.sender }
-              ]
-            }).populate('messages').sort({ updatedAt : -1})
-    
-      console.log('conversation is the ', getConversationMessage)
-      //sending the message to specific user(const user = await getUserDetailsFromToken(token), 
-      // use this defined user in that line) , use it as a sender and also add th receiver user
-      io.to(data?.sender).emit('message', getConversationMessage.messages)//.message, means return only the message from the getConversationMessage
-      io.to(data?.receiver).emit('message', getConversationMessage.messages)
-      
-    }) //ending of socket.on for message
+      console.log("Message saved:", saveMessage);
+  
+      // FIX 2: Ensure conversation object is valid before attempting to update.
+      // This is important because if createConversation.save() above failed or wasn't awaited,
+      // conversation could be undefined or a promise.
+      if (conversation && conversation._id) {
+          const updateConversation = await Conversation.updateOne(
+              { _id: conversation._id }, // Use conversation._id directly
+              { "$push": { messages: saveMessage._id } }
+          );
+          console.log("Conversation updated:", updateConversation);
+      } else {
+          console.error("Conversation object is invalid or missing _id. Cannot update conversation with new message.");
+          // You might want to handle this error more robustly, e.g., by informing the sender.
+          return; // Stop processing if conversation is invalid
+      }
+  
+  
+      const getConversationMessage = await Conversation.findOne({
+          "$or": [
+              { sender: data?.sender, receiver: data?.receiver },
+              { sender: data?.receiver, receiver: data?.sender }
+          ]
+      }).populate('messages').sort({ updatedAt: -1 });
+  
+      console.log('Conversation retrieved with populated messages:', getConversationMessage);
+  
+      // FIX 3: Emitting to specific users.
+      // The `io.to(socketId).emit()` method works by sending to a specific socket ID.
+      // If `data.sender` and `data.receiver` are user IDs (e.g., MongoDB `_id`s from your database),
+      // you need a way to map these user IDs to their respective `socket.id`s.
+      // The most common and robust way is to have users `socket.join(userId)` a room named after their ID
+      // when they connect. Then you can emit to that room: `io.to(userId).emit(...)`.
+      // If you're not using rooms, you'll need a server-side map (e.g., `const userSocketMap = new Map();`)
+      // where you store `userSocketMap.set(userId, socket.id)` on connection.
+  
+      // Assuming you have a mechanism (like rooms named after user IDs) where data.sender and data.receiver
+      // represent the IDs of the users/rooms to send to:
+      if (data?.sender) {
+          io.to(data.sender).emit('message', getConversationMessage.messages);
+          console.log(`Emitting to sender (${data.sender}):`, getConversationMessage.messages.length, "messages");
+      }
+      if (data?.receiver) {
+          io.to(data.receiver).emit('message', getConversationMessage.messages);
+          console.log(`Emitting to receiver (${data.receiver}):`, getConversationMessage.messages.length, "messages");
+      } else {
+          console.warn("Receiver ID is missing, message not emitted to receiver.");
+      }
+  });
 
     socket.on("disconnect", () => {
       if (socket.userId) {

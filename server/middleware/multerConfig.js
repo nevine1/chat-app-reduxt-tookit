@@ -1,27 +1,32 @@
+// routes/upload.js
+const express = require("express");
 const multer = require("multer");
 const path = require("path");
 
-// Multer storage configuration
+const router = express.Router();
+
+// Configure multer to save in /uploads folder
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, "uploads/"); // Save files in the 'uploads' folder
-    },
-    filename: (req, file, cb) => {
-        cb(null, `${Date.now()}-${file.originalname}`); // Unique file name
-    }
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // make sure this folder exists
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = Date.now() + "-" + file.originalname;
+    cb(null, name);
+  },
 });
 
-// File filter to allow only images (JPG, PNG, JPEG)
-const fileFilter = (req, file, cb) => {
-    const allowedTypes = ["image/jpeg", "image/png", "image/jpg"];
-    if (allowedTypes.includes(file.mimetype)) {
-        cb(null, true);
-    } else {
-        cb(new Error("Only images are allowed!"), false);
-    }
-};
+const upload = multer({ storage });
 
-// Configure Multer instance
-const upload = multer({ storage, fileFilter });
+router.post("/", upload.single("file"), (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: "No file uploaded" });
+  }
 
-module.exports = upload; 
+  // Return the file URL (assuming you're serving uploads statically)
+  const fileUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  res.json({ url: fileUrl });
+});
+
+module.exports = router;

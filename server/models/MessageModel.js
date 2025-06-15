@@ -7,11 +7,11 @@ const messageSchema = new mongoose.Schema({
     }, 
     imageUrls: {
         type: [String], 
-        default: ""
+        default: []
     }, 
     videoUrls: {
         type: [String], 
-        default: ""
+        default: []
     }, 
     seen: {
         type: Boolean, 
