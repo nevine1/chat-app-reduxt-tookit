@@ -12,6 +12,7 @@ import moment from 'moment';
 import Link from 'next/link';
 import { setIsLoading } from '@/store/slices/auth/authSlice';
 import uploadFile from '@/uploads/upload';
+import AllMessages from './AllMessages';
 const SendMessage = ({ userId, allMessages, currentMsg }) => {
     const [socket, setSocket] = useState(null);
     const backendUrl = "http://localhost:5000";
@@ -30,15 +31,7 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
     const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
     const [uploadedVideoUrls, setUploadedVideoUrls] = useState([]);
 
-    // Ref for scrolling to the latest message
-    const messagesEndRef = useRef(null);
-
-    // Scroll to the bottom when new messages sent
-    useEffect(() => {
-        if (messagesEndRef.current) {
-            messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-        }
-    }, [allMessages]);
+  
 
     // Handle image file selection and local preview
     const handleUploadImage = async (e) => {
@@ -184,61 +177,15 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
 
                     {/* all messages */}
                     <div className="flex flex-col">
-                        {
-                            allMessages.map((msg, index) => (
-                            <div
-                                key={index}
-                                ref={index === allMessages.length - 1 ? currentMsg : null}
-                                className={`flex flex-col max-w-fit py-1 px-4 m-2 rounded-lg shadow-sm
-                                ${user?._id === msg.sender
-                                    ? ' bg-blue-400 text-right self-end rounded-tr-none'
-                                    : 'bg-gray-200 text-left self-start rounded-tl-none'
-                                }`}
-                            >
-                                {/*  after mapping messages and getting the imageUrls, then map imageUrl to show the uploaded images */}
-                                {msg.imageUrls && Array.isArray(msg.imageUrls) && msg.imageUrls.length > 0 && (
-                                <div className="flex flex-wrap gap-2 mt-2">
-                                    {msg.imageUrls.map((url, index) => (
-                                    <div key={index}>
-                                        <Link href={url}>
-                                            <img
-                                            src={url}
-                                            alt={`Uploaded image ${index}`}
-                                            className="w-48 h-48 object-cover rounded-lg border cursor-pointer"
-                                            />     
-                                        </Link>
-                                    </div>
-                                    ))}
-                                </div>
-                                )}
-                                
-                                {msg.videoUrls && Array.isArray(msg.videoUrls) && msg.videoUrls.length > 0 && (
-                                <div className="mt-2">
-                                    {msg.videoUrls.map((video, idx) => (
-                                    <video
-                                        key={idx}
-                                        src={video}
-                                        controls
-                                        className="aspect-video w-full max-w-sm rounded-lg bg-white"
-                                    />
-                                    ))}
-                                </div>
-                                )}
-                                
-                                {msg.text && <p className="text-white">{msg.text}</p>}
-
-                                <p className="text-white text-xs mt-1">
-                                {moment(msg.createdAt).format("hh:mm A")}
-                                </p>
-                            </div>
-                            ))
-                        }
+                        <AllMessages
+                            allMessages={allMessages}
+                            message={message}
+                            currentMsg={currentMsg}
+                            />
+                        
                         </div>
 
-
-
                 </section>
-
 
                 {/* send new message */}
                 <section className="bg-white py-2 px-3 pr-4">
@@ -251,8 +198,8 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                 <button type="button" onClick={() => setShowMediaOptions(!showMediaOptions)}>
                                     <FaPlus
                                         className="bg-blue-500 text-white rounded-full p-1 w-6 h-6
-                                hover:text-blue-500 border hover:border-blue-500
-                                hover:bg-white duration-200 transition-all cursor-pointer"
+                                            hover:text-blue-500 border hover:border-blue-500
+                                            hover:bg-white duration-200 transition-all cursor-pointer"
                                     />
                                 </button>
 
