@@ -98,12 +98,7 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
         <HiOutlineDotsVertical size={26} />
       </div>
      </header>
-
-
-     {/* all messages  */}
      
-
-    
      <section className=" ">
        
        <SendMessage userId={userId} allMessages={allMessages} currentMsg={currentMsg}  />
