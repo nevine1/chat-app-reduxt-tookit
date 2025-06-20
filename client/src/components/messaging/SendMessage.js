@@ -27,7 +27,8 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
     });
 
     const [imageFile, setImageFile] = useState(null);
-    const [videoFile, setVideoFile] = useState(null);
+    const [videoFile, setVideoFile] = useState(null); 
+   const [previewImageUrl , setPreviewImageUrl ] = useState('')
     const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
     const [uploadedVideoUrls, setUploadedVideoUrls] = useState([]);
 
@@ -35,18 +36,25 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
 
     // Handle image file selection and local preview
     const handleUploadImage = async (e) => {
-        const file = e.target.files?.[0] || [];
-        if (!file) return;
+       
+        const files = Array.from(e.target.files || []);
+        if (files.length === 0) return;
       
-        const localUrl = URL.createObjectURL(file);
-        setUploadedImageUrls((prev) => [...prev, localUrl]);
-        setImageFile(file);
-        setShowMediaOptions(!showMediaOptions);
+        // Preview each selected image
+        const localUrls = files.map(file => URL.createObjectURL(file));
+        setUploadedImageUrls(prev => [...prev, ...localUrls]);
+      
+        // Store selected image files for upload
+        setImageFile(prev => [...(prev || []), ...files]);
+        
+        e.target.value = '';
+      
+        setShowMediaOptions(false);
     };
       
     // Clear uploaded image
     const handleRemoveImage = (urlToRemove) => {
-        setPreviewImageUrl((prev) => prev.filter((url) => url !== urlToRemove));
+        setUploadedImageUrls((prev) => prev.filter((url) => url !== urlToRemove));
         
         setMessage((prev) => ({
             ...prev,
@@ -128,12 +136,19 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                 let uploadedImages = [];
                 let uploadedVideos = [];
         
-                if (hasImage) {
+                if (hasImage && Array.isArray(imageFile)) {
+                    for (const file of imageFile) {
+                      const uploadedImageUrl = await uploadFile(file, token);
+                      if (uploadedImageUrl) {
+                        uploadedImages.push(uploadedImageUrl);
+                      }
+                    }
+                  } else if (imageFile) {
                     const uploadedImageUrl = await uploadFile(imageFile, token);
                     if (uploadedImageUrl) {
-                        uploadedImages.push(uploadedImageUrl);
+                      uploadedImages.push(uploadedImageUrl);
                     }
-                }
+                  }
         
                 if (hasVideo) {
                     const uploadedVideoUrl = await uploadFile(videoFile, token);
@@ -149,7 +164,7 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                     msgByUserId: user._id,
                     createdAt: new Date().toISOString(),
                 };
-        
+               
                 console.log("📦 message to send:", msgToSend);
         
                 socket.emit("new message", msgToSend);
@@ -215,7 +230,8 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                         </label>
 
                                         <input type="file"
-                                            id="uploadImage"
+                                                id="uploadImage"
+                                                multiple
                                             onChange={handleUploadImage}
                                             className="hidden"
                                             accept="image/*" 
@@ -245,6 +261,7 @@ const SendMessage = ({ userId, allMessages, currentMsg }) => {
                                                 src={url}
                                                 width={60}
                                                 height={60}
+                                                multiple
                                                 alt={`preview-${index}`}
                                                 className="aspect-square w-16 h-16 object-cover rounded"
                                             />
