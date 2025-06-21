@@ -9,7 +9,7 @@ import { FaAngleLeft } from "react-icons/fa6";
 import SendMessage from './SendMessage';
 
 const MessageBar = ({userId}) => {
-  const { token } = useSelector(state => state.auth);
+  const { token , user} = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
   const dispatch = useDispatch();
   const [allMessages, setAllMessages] = useState([])
@@ -27,8 +27,6 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
           dispatch(setOnlineUsers(users));
         });
       
-      console.log('connected socket in message page is:', socket)
-      
       if (socket) {
          
           socket.emit("message-page", userId); //  This is the ID being sent
@@ -39,11 +37,9 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
         
         //to see the sent and received messages 
         socket.on('message', (data) => {
-          console.log('message data is:', data)
           setAllMessages(data)
         })
-         
-        console.log("user id in message page is, ", userId);
+        
       }
     
         return () => {
@@ -60,6 +56,32 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
       currentMsg.current.scrollIntoView({ behavior: "smooth" })
     }
   }, [allMessages]);
+
+  //fetching of all messages ;
+  
+  const fetchMessages = async (senderId, userId, token) => {
+    const res = await fetch(`http://localhost:5000/api/messages/${userId}?myId=${senderId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    return data;
+  };
+  
+  
+  useEffect(() => {
+    const loadMessages = async () => {
+      const messages = await fetchMessages(user._id, userId, token);
+      setAllMessages(messages); 
+    };
+  
+    if (userId) {
+      loadMessages();
+    }
+  }, [userId]);
+  
+
 
  return (
     <div className="w-full ">

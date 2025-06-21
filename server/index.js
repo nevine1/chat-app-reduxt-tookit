@@ -6,6 +6,7 @@ const cookieParser = require("cookie-parser");
 require("dotenv").config();
 const connectDB = require('./config/connectDB');
 const routerOfUsers = require('./routers/userRouter');
+const routerOfMessages = require('./routers/messagesRoutes')
 const uploadRoutes = require("./routers/upload")
 const path = require('path');
 
@@ -22,6 +23,7 @@ app.use(cors({
 
 // API Routes
 app.use("/api/users", routerOfUsers);
+app.use("/api/messages", routerOfMessages);
 
 //uploads files (images, videos,....) 
 // Serve static files from /uploads folder

@@ -57,7 +57,7 @@ const socketServer = (app) => {
       const payload = {
         _id: userDetails?._id,
         name: userDetails?.name,
-          email: userDetails?.email,
+        email: userDetails?.email,
         profile_pic: userDetails?.profile_pic,
         online: onlineUsers.has(targetUserId),
       };
@@ -99,19 +99,17 @@ const socketServer = (app) => {
       const saveMessage = await message.save();
       console.log("Message saved:", saveMessage);
   
-      // FIX 2: Ensure conversation object is valid before attempting to update.
-      // This is important because if createConversation.save() above failed or wasn't awaited,
-      // conversation could be undefined or a promise.
+     
       if (conversation && conversation._id) {
           const updateConversation = await Conversation.updateOne(
-              { _id: conversation._id }, // Use conversation._id directly
+              { _id: conversation._id }, // Use conversation._id 
               { "$push": { messages: saveMessage._id } }
           );
           console.log("Conversation updated:", updateConversation);
       } else {
           console.error("Conversation object is invalid or missing _id. Cannot update conversation with new message.");
-          // You might want to handle this error more robustly, e.g., by informing the sender.
-          return; // Stop processing if conversation is invalid
+         
+          return; 
       }
   
   
@@ -145,7 +143,13 @@ const socketServer = (app) => {
       } else {
           console.warn("Receiver ID is missing, message not emitted to receiver.");
       }
-  });
+
+
+      
+  }); 
+
+    
+    
 
     socket.on("disconnect", () => {
       if (socket.userId) {
