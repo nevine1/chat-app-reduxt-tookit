@@ -15,7 +15,8 @@ const {
     userDetails,
     logout,
   updateUserDetails, 
-    searchForUser
+  searchForUser,
+  getUsers
         } = require('../controllers/userController')
 
 
@@ -34,7 +35,7 @@ router.post("/newPassword", newPass);
 router.get("/user-details", userDetails);
 router.post("/searchingUser", searchForUser);
 router.get("/logout", logout);
-
+router.get('/fetchAllUer', getUsers)
 /* router.put(
   "/update-userInfo",
   verifyToken,
