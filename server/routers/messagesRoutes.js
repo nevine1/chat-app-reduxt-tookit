@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Message = require('../models/MessageModel');
 const Conversation = require('../models/ConversationModel');
-
+const lastMessageRoute = require('../controllers/messagesController')
 router.get('/:userId', async (req, res) => {
+
   const senderId = req.query.myId;
   const userId = req.params.userId;
 
@@ -25,4 +26,5 @@ router.get('/:userId', async (req, res) => {
   }
 });
 
+router.get('/last-message/:userId', lastMessageRoute)
 module.exports = router;

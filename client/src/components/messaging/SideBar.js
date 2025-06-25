@@ -10,15 +10,18 @@ import { logOut } from "../../store/slices/auth/authSlice";
 import Image from "next/image";
 import UserSearchingPage from "./UserSearchingPage";
 import Link from 'next/link'
+import { useParams } from "next/navigation";
+import {connectSocket, disconnectSocket } from "../../app/socket/socket"
 const SideBar = () => {
+  const userId = useParams();
   const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
   const router = useRouter();
-  const { user } = useSelector((state) => state.auth);
+  const { user , token} = useSelector((state) => state.auth);
   const [openSearchBar, setOpenSearchBar] = useState(false);
   const [allUsers, setAllUsers ] = useState([])
-  const profilePic = user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg";
-console.log("hello here is all users:", allUsers)
+  const profilePic = user?.profile_pic ? `/assets/${user?.profile_pic}` : "/assets/flower.jpg";
+  const [lastMsgs, setLastMgs ] = useState([])
   const logout = () => {
     dispatch(logOut());
     const persistor = persistStore(store);
@@ -26,7 +29,7 @@ console.log("hello here is all users:", allUsers)
     router.push("/");
   };
   const URL = `${process.env.NEXT_PUBLIC_BACK_END_URL}/users`;
-  //console.log(`backend url is: `, URL)
+  const backendUrl = "http://localhost:5000";
   //getting all users when log in to ur chat page
   const fetchAllUsers = async () => {
     try {
@@ -35,8 +38,6 @@ console.log("hello here is all users:", allUsers)
       const resp = await fetch('http://localhost:5000/api/users/fetchAllUer');
   
       const data = await resp.json();
-  
-      console.log('data is : ', data)
       if (resp.data.success) {
         setAllUsers(resp.data.data);
         
@@ -53,9 +54,6 @@ console.log("hello here is all users:", allUsers)
     }
   };
   
-  
-  
-  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -64,12 +62,34 @@ console.log("hello here is all users:", allUsers)
         console.log("All users:", data.data);
         setAllUsers(data.data)
       } catch (err) {
-        console.error("Error fetching users:", err);
+        console.log("Error fetching users:", err);
       }
     };
   
     fetchUsers();
   }, []);
+  
+  console.log('message bar all users are:', allUsers)
+
+  //fetching all messages to display the last message beside each user name
+  useEffect(() => {
+    const fetchFriendsWithLastMessage = async () => {
+      try {
+        const res = await fetch(`http://localhost:5000/api/messages/last-message/${user._id}`);
+        const data = await res.json();
+  
+        if (data.success) {
+          setLastMg(data.data);
+        }
+      } catch (err) {
+        console.error("Failed to load last messages", err);
+      }
+    };
+  
+    if (user?._id) {
+      fetchFriendsWithLastMessage();
+    }
+  }, [user]);
   
   return (
     <div className="flex flex-row bg-blue-300 h-full ">
@@ -108,16 +128,26 @@ console.log("hello here is all users:", allUsers)
       <div className="mt-4">
        
         {
-          allUsers.length > 0 &&
-          allUsers.map(user => (
-            <div key={user._id}>
-              <Link
-                href={`/dashboard/${user._id}`}  
-                className="text-[17px] text-gray-600 py-2 pl-4"
-              >
-                {user.name}
+          lastMsgs.map(({ friend, lastMessage }) => (
+           <div key={friend._id} className="flex flex-col gap-1 ml-3 mb-3">
+            <div className="flex items-center gap-2">
+              <Image
+                className="w-7 h-7 rounded-full"
+                src={friend?.profile_pic ? `/assets/${friend.profile_pic}` : "/assets/flower.jpg"}
+                height={28}
+                width={28}
+                alt={`${friend.name} profile pic`}
+              />
+              <Link href={`/dashboard/${friend._id}`} className="text-[17px] text-gray-600 py-1">
+                {friend.name}
               </Link>
             </div>
+            {lastMessage && (
+              <p className="ml-9 text-[13px] text-gray-500 truncate max-w-[200px]">
+                {lastMessage?.text || lastMessage?.mediaType || "Media message"}
+              </p>
+            )}
+          </div>
           ))
         }
       </div>

@@ -12,11 +12,12 @@ const MessageBar = ({userId}) => {
   const { token , user} = useSelector(state => state.auth);
   const [chatUser, setChatUser ] = useState(null)
   const dispatch = useDispatch();
+
   const [allMessages, setAllMessages] = useState([])
   const currentMsg = useRef(null)
   const backendUrl = "http://localhost:5000";
   
-const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : "/assets/flower.jpg"
+  const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : "/assets/flower.jpg"
   
   useEffect(() => {
       
@@ -48,8 +49,6 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
 
     }, [token, userId]);
   
-
-  console.log('here is all messages for this conversation', allMessages)
   
   useEffect(() => {
     if (currentMsg.current) {
@@ -68,7 +67,6 @@ const profilePic = chatUser?.profile_pic ? `/assets/${chatUser?.profile_pic}` : 
     const data = await res.json();
     return data;
   };
-  
   
   useEffect(() => {
     const loadMessages = async () => {

@@ -26,7 +26,7 @@ export const connectSocket = (token, backendUrl) => {
     });
 
     socket.on("connect_error", (err) => {
-      console.error(" Connection error:", err.message);
+      console.log(" Connection error:", err.message);
     });
   }
 
