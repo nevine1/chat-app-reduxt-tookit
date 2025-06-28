@@ -79,7 +79,7 @@ const MessageBar = ({userId}) => {
     }
   }, [userId]);
   
-
+console.log('hello here are all messages', allMessages)
 
  return (
     <div className="w-full ">

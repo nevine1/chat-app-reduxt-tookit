@@ -122,17 +122,6 @@ const socketServer = (app) => {
   
       console.log('Conversation retrieved with populated messages:', getConversationMessage);
   
-      // FIX 3: Emitting to specific users.
-      // The `io.to(socketId).emit()` method works by sending to a specific socket ID.
-      // If `data.sender` and `data.receiver` are user IDs (e.g., MongoDB `_id`s from your database),
-      // you need a way to map these user IDs to their respective `socket.id`s.
-      // The most common and robust way is to have users `socket.join(userId)` a room named after their ID
-      // when they connect. Then you can emit to that room: `io.to(userId).emit(...)`.
-      // If you're not using rooms, you'll need a server-side map (e.g., `const userSocketMap = new Map();`)
-      // where you store `userSocketMap.set(userId, socket.id)` on connection.
-  
-      // Assuming you have a mechanism (like rooms named after user IDs) where data.sender and data.receiver
-      // represent the IDs of the users/rooms to send to:
       if (data?.sender) {
           io.to(data.sender).emit('message', getConversationMessage.messages);
           console.log(`Emitting to sender (${data.sender}):`, getConversationMessage.messages.length, "messages");
@@ -148,9 +137,76 @@ const socketServer = (app) => {
       
   }); 
 
-    
-    
+    //sidebar's last msg
 
+    socket.on("sidebar", async (currentUserId) => {
+      console.log("current user id in the sidebar page is: ", currentUserId)
+      const currentUserConversation = await Conversation.find({
+        "$or": [
+          { sender: currentUserId }, 
+          { receiver: currentUserId}
+        ]
+      }).sort({ updatedAt: -1 })
+
+      console.log('current conversation is: ', currentUserConversation)
+
+      const conversation = currentUserConversation.map((conv) => {
+        
+        const countUnseenMsg = conv?.messages?.reduce((prev,curr) => {
+          const msgByUserId = curr?.msgByUserId?.toString()
+
+          if(msgByUserId !== currentUserId){
+              return  prev + (curr?.seen ? 0 : 1)
+          }else{
+              return prev
+          }
+       
+      },0)
+        return {
+          _id: conv?._id, 
+          sender: conv?.sender, 
+          receiver: conv?.receiver, 
+          unseenMsg: countUnseenMsg, 
+          lastMsg: conv.messages[conv?.messages?.length -1]
+        }
+      })
+      socket.emit('conversation', conversation)
+    })
+
+     /* socket.on('sidebar', async(currentUserId)=>{
+      console.log("current user",currentUserId)
+
+      const conversation = await getConversation(currentUserId)
+
+      socket.emit('conversation',conversation)
+      
+        }) */
+
+      /*   socket.on('seen',async(msgByUserId)=>{
+            
+            let conversation = await ConversationModel.findOne({
+                "$or" : [
+                    { sender : user?._id, receiver : msgByUserId },
+                    { sender : msgByUserId, receiver :  user?._id}
+                ]
+            })
+
+      const conversationMessageId = conversation?.messages || []
+
+      const updateMessages  = await MessageModel.updateMany(
+          { _id : { "$in" : conversationMessageId }, msgByUserId : msgByUserId },
+          { "$set" : { seen : true }}
+      )
+
+      //send conversation
+      const conversationSender = await getConversation(user?._id?.toString())
+      const conversationReceiver = await getConversation(msgByUserId)
+
+      io.to(user?._id?.toString()).emit('conversation',conversationSender)
+      io.to(msgByUserId).emit('conversation',conversationReceiver)
+  }) */
+    
+//disconnect 
     socket.on("disconnect", () => {
       if (socket.userId) {
         onlineUsers.delete(socket.userId);

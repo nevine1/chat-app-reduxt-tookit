@@ -21,7 +21,8 @@ const SideBar = () => {
   const [openSearchBar, setOpenSearchBar] = useState(false);
   const [allUsers, setAllUsers ] = useState([])
   const profilePic = user?.profile_pic ? `/assets/${user?.profile_pic}` : "/assets/flower.jpg";
-  const [lastMsgs, setLastMgs ] = useState([])
+  const [lastMsgs, setLastMgs] = useState([])
+  
   const logout = () => {
     dispatch(logOut());
     const persistor = persistStore(store);
@@ -72,7 +73,7 @@ const SideBar = () => {
   console.log('message bar all users are:', allUsers)
 
   //fetching all messages to display the last message beside each user name
-  useEffect(() => {
+/*   useEffect(() => {
     const fetchFriendsWithLastMessage = async () => {
       try {
         const res = await fetch(`http://localhost:5000/api/messages/last-message/${user._id}`);
@@ -89,12 +90,34 @@ const SideBar = () => {
     if (user?._id) {
       fetchFriendsWithLastMessage();
     }
-  }, [user]);
+  }, [user]); */
+  
+  //fetching the last message for users 
+  useEffect(() => {
+       
+         if (!token) return;
+         const socket = connectSocket(token, backendUrl);
+       
+       if (socket) {
+          
+           socket.emit("sidebar", user?._id); 
+         socket.on('conversation', (data) => {
+           
+         } )
+         
+       }
+     
+         return () => {
+           disconnectSocket();
+         };
+ 
+     }, [token, user]);
+  
   
   return (
     <div className="flex flex-row bg-blue-300 h-full ">
-      <div className="flex flex-col p-4 sm:p-5 sm:w-[40px] justify-between items-center h-full bg-slate-300 py-3">
-        <div className="flex flex-col items-center ">
+      <div className="flex flex-col p-4 sm:p-5 sm:w-[150px] justify-between items-center h-full bg-slate-300 py-3">
+        <div className="flex flex-col items-center w-[100px] sm:w-[70x]">
           <FaUserPlus
             size={25}
             onClick={() => setOpenSearchBar(true)}
@@ -125,31 +148,29 @@ const SideBar = () => {
           </button>
         </div>
       </div>
-      <div className="mt-4">
+      <div className="mt-4 bg-green-400 w-[30%] sm:w-[40%]">
        
         {
-          lastMsgs.map(({ friend, lastMessage }) => (
-           <div key={friend._id} className="flex flex-col gap-1 ml-3 mb-3">
+          allUsers.map((user) => (
+           <div key={user._id} className="flex flex-col gap-1 ml-3 mb-3">
             <div className="flex items-center gap-2">
               <Image
                 className="w-7 h-7 rounded-full"
-                src={friend?.profile_pic ? `/assets/${friend.profile_pic}` : "/assets/flower.jpg"}
+                src={user?.profile_pic ? `/assets/${user.profile_pic}` : "/assets/flower.jpg"}
                 height={28}
                 width={28}
-                alt={`${friend.name} profile pic`}
+                alt={`${user.name} profile pic`}
               />
-              <Link href={`/dashboard/${friend._id}`} className="text-[17px] text-gray-600 py-1">
-                {friend.name}
+              <Link href={`/dashboard/${user._id}`} className="text-[17px] text-gray-600 py-1">
+                {user.name}
               </Link>
             </div>
-            {lastMessage && (
-              <p className="ml-9 text-[13px] text-gray-500 truncate max-w-[200px]">
-                {lastMessage?.text || lastMessage?.mediaType || "Media message"}
-              </p>
-            )}
+            
           </div>
           ))
         }
+
+       
       </div>
     </div>
     
